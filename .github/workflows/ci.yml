@@ -29,9 +29,9 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install
+      - name: Install (npm ci)
         working-directory: workers/${{ matrix.worker }}
-        run: npm install
+        run: npm ci
 
       - name: Typecheck
         working-directory: workers/${{ matrix.worker }}
