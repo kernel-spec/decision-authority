@@ -11,7 +11,7 @@ vars = { ENV = "stage" }
 [[env.stage.d1_databases]]
 binding = "DB"
 database_name = "decision_authority_stage"
-database_id = "REPLACE_STAGE_D1_ID"
+database_id = "cf1c8b23-081a-49cc-8652-95ad611adcc4"
 
 [[env.stage.r2_buckets]]
 binding = "R2"
@@ -23,7 +23,7 @@ vars = { ENV = "prod" }
 [[env.prod.d1_databases]]
 binding = "DB"
 database_name = "decision_authority_prod"
-database_id = "REPLACE_PROD_D1_ID"
+database_id = "48fabd29-f707-4b68-8f4c-ee8cde3b0504"
 
 [[env.prod.r2_buckets]]
 binding = "R2"
