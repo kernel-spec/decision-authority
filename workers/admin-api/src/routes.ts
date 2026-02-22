@@ -1,7 +1,7 @@
 import type { Env } from "./index";
 
 export const Router = {
-  async handle(req: Request, env: Env) {
+  async handle(req: Request, env: Env, _ctx?: ExecutionContext) {
     const url = new URL(req.url);
 
     if (url.pathname.startsWith("/admin/")) {

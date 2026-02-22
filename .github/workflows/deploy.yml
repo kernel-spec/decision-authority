@@ -5,9 +5,15 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: |
+      (matrix.env == 'stage' && github.ref_type == 'branch') ||
+      (matrix.env == 'prod' && github.ref_type == 'tag')
     strategy:
       matrix:
         env: [ stage, prod ]
@@ -18,11 +24,6 @@ jobs:
             trigger: tag
     steps:
       - uses: actions/checkout@v4
-
-      - name: Gate by trigger
-        run: |
-          if [[ "${{ matrix.env }}" == "stage" && "${{ matrix.trigger }}" != "branch" ]]; then exit 0; fi
-          if [[ "${{ matrix.env }}" == "prod" && "${{ matrix.trigger }}" != "tag" ]]; then exit 0; fi
 
       - uses: actions/setup-node@v4
         with:
