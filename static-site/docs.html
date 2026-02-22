@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decision Authority — Docs</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="wrap">
+    <a class="back" href="./index.html">← Back</a>
+    <h1>Docs</h1>
+    <p class="sub">Quickstart + endpoints + copy/paste payloads.</p>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Endpoints</h2>
+      <ul>
+        <li><b>decision-api</b>: <code>POST /decision-runs</code></li>
+        <li><b>admin-api</b>: <code>GET /admin/health</code>, <code>GET /admin/runs</code></li>
+        <li><b>admin-api</b>: <code>POST /admin/retention/purge</code>, <code>POST /admin/policy/promote</code></li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>POST /decision-runs (example body)</h2>
+      <p class="hint">Replace values as needed. This matches the CFO RUN format used in your VSF chain.</p>
+      <div class="code">
+<pre><code>{
+  "decision_type": "HIRING_LIQUIDITY_STRESS",
+  "micro_case": {
+    "label": "Breakeven vs Narrative",
+    "profile": "Profitability-Heavy",
+    "context": {
+      "company_type": "SaaS",
+      "arr_usd": 9000000,
+      "gross_margin_pct": 74,
+      "cash_balance_usd": 3500000,
+      "cash_burn_usd_per_month": 250000,
+      "qualified_pipeline_usd": 4200000,
+      "next_quarter_new_arr_target_usd": 1200000,
+      "sales_marketing_spend_usd_per_month": 650000,
+      "new_arr_gross_profit_usd_per_month": 60000,
+      "board_dynamic": "Breakeven in 12 months."
+    },
+    "decision_tension": {
+      "proposal": "Freeze hiring + cut marketing",
+      "spend_or_change": "Reallocate spend with tranche gating",
+      "why_now": "Runway and board mandate"
+    }
+  },
+  "trigger_spec": {
+    "version": "v1",
+    "metrics": [
+      {
+        "metric_id": "RUNWAY_MONTHS",
+        "formula": "cash_balance_usd / cash_burn_usd_per_month",
+        "measurement_window": "monthly",
+        "threshold": { "operator": "&gt;=", "value": 10, "unit": "months" }
+      },
+      {
+        "metric_id": "PIPELINE_COVERAGE_X",
+        "formula": "qualified_pipeline_usd / next_quarter_new_arr_target_usd",
+        "measurement_window": "weekly",
+        "threshold": { "operator": "&gt;=", "value": 3.0, "unit": "x" }
+      },
+      {
+        "metric_id": "CAC_PAYBACK_MONTHS",
+        "formula": "sales_marketing_spend_usd_per_month / new_arr_gross_profit_usd_per_month",
+        "measurement_window": "monthly",
+        "threshold": { "operator": "&lt;=", "value": 12, "unit": "months" }
+      }
+    ]
+  },
+  "gating_rules": {
+    "version": "v1",
+    "tranches": [
+      {
+        "tranche_id": "T1_REALLOCATE",
+        "gate_conditions": [
+          { "metric_id": "RUNWAY_MONTHS", "must_pass": true },
+          { "metric_id": "PIPELINE_COVERAGE_X", "must_pass": true }
+        ],
+        "actions_if_pass": [
+          "Reallocate marketing to high contribution channels",
+          "Freeze non-critical hiring"
+        ],
+        "actions_if_fail": [
+          "Stop new commitments",
+          "Escalate to board checkpoint within 7 days"
+        ]
+      }
+    ]
+  },
+  "outcome_contract": {
+    "version": "v1",
+    "decision_owner": "CFO",
+    "approval_gates": ["CEO", "Board"],
+    "enforcement_principles": [
+      "Fail-closed if missing required inputs",
+      "No tranche release without passing gate conditions"
+    ]
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>cURL templates</h2>
+      <div class="code">
+<pre><code># decision run
+curl -X POST "$DECISION_URL/decision-runs" \
+  -H "content-type: application/json" \
+  -d @payload.json
+
+# admin health
+curl -H "X-ADMIN-KEY: &lt;ADMIN_KEY&gt;" "$ADMIN_URL/admin/health"
+
+# runs list
+curl -H "X-ADMIN-KEY: &lt;ADMIN_KEY&gt;" "$ADMIN_URL/admin/runs"
+</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <span>Decision Authority • Static Docs</span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
