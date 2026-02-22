@@ -11,15 +11,17 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ (matrix.env == 'stage' && github.ref_type == 'branch') || (matrix.env == 'prod' && github.ref_type == 'tag') }}
+
     strategy:
       matrix:
         env: [ stage, prod ]
-        include:
-          - env: stage
-            trigger: branch
-          - env: prod
-            trigger: tag
+
+    if: ${{ (matrix.env == 'stage' && github.ref_type == 'branch') || (matrix.env == 'prod' && github.ref_type == 'tag') }}
+
+    concurrency:
+      group: deploy-${{ matrix.env }}
+      cancel-in-progress: true
+
     steps:
       - uses: actions/checkout@v4
 
