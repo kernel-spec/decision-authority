@@ -11,9 +11,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: |
-      (matrix.env == 'stage' && github.ref_type == 'branch') ||
-      (matrix.env == 'prod' && github.ref_type == 'tag')
+    if: ${{ (matrix.env == 'stage' && github.ref_type == 'branch') || (matrix.env == 'prod' && github.ref_type == 'tag') }}
     strategy:
       matrix:
         env: [ stage, prod ]
