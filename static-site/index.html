@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decision Authority — Control Center</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="wrap">
+    <div class="badge">Decision Authority</div>
+    <h1>Control Center (Static)</h1>
+    <p class="sub">
+      Minimal static hub for your Workers stack: <b>decision-api</b> + <b>admin-api</b>.
+      Use this page for links, curl commands, and quick docs.
+    </p>
+
+    <div class="grid">
+      <a class="card" href="./docs.html">
+        <h2>Docs</h2>
+        <p>Quickstart, endpoints, payload examples, smoke tests.</p>
+      </a>
+
+      <a class="card" href="#" id="repoLink">
+        <h2>GitHub Repo</h2>
+        <p>Open the repository (configure below).</p>
+      </a>
+
+      <a class="card" href="#" id="decisionApiLink">
+        <h2>decision-api</h2>
+        <p>POST /decision-runs (configure URL below).</p>
+      </a>
+
+      <a class="card" href="#" id="adminApiLink">
+        <h2>admin-api</h2>
+        <p>GET /admin/health, /admin/runs (configure URL below).</p>
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Configure URLs (saved locally in your browser)</h2>
+      <div class="form">
+        <label>GitHub Repo URL</label>
+        <input id="repoUrl" placeholder="https://github.com/kernel-spec/decision-authority" />
+
+        <label>decision-api base URL</label>
+        <input id="decisionUrl" placeholder="https://decision-api.<your-subdomain>.workers.dev" />
+
+        <label>admin-api base URL</label>
+        <input id="adminUrl" placeholder="https://admin-api.<your-subdomain>.workers.dev" />
+
+        <button id="saveBtn">Save</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+      <p class="hint">
+        Tip: paste the Workers URLs from Cloudflare → Workers → your worker → Deployments / Triggers,
+        or use the default *.workers.dev domain.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Quick Smoke Tests</h2>
+      <div class="code">
+<pre><code># admin-api health
+curl -H "X-ADMIN-KEY: &lt;ADMIN_KEY&gt;" "$ADMIN_URL/admin/health"
+
+# list runs (joined with usage_ledger once decision-api writes it)
+curl -H "X-ADMIN-KEY: &lt;ADMIN_KEY&gt;" "$ADMIN_URL/admin/runs"
+</code></pre>
+      </div>
+      <p class="hint">Full payload examples are on the Docs page.</p>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <span>Static hub • No secrets stored • Only localStorage for URLs</span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
