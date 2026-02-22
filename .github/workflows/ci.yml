@@ -1,0 +1,36 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  policy-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/policy-validate.mjs
+
+  workers:
+    runs-on: ubuntu-latest
+    needs: [ policy-validate ]
+    strategy:
+      matrix:
+        worker: [ "decision-api", "admin-api" ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        working-directory: workers/${{ matrix.worker }}
+        run: npm ci
+      - name: Typecheck
+        working-directory: workers/${{ matrix.worker }}
+        run: npm run typecheck
+      - name: Test
+        working-directory: workers/${{ matrix.worker }}
+        run: npm test
