@@ -1,0 +1,60 @@
+name: Deploy
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - "v*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [ stage, prod ]
+        include:
+          - env: stage
+            trigger: branch
+          - env: prod
+            trigger: tag
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gate by trigger
+        run: |
+          if [[ "${{ matrix.env }}" == "stage" && "${{ matrix.trigger }}" != "branch" ]]; then exit 0; fi
+          if [[ "${{ matrix.env }}" == "prod" && "${{ matrix.trigger }}" != "tag" ]]; then exit 0; fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps (decision-api)
+        working-directory: workers/decision-api
+        run: npm ci
+
+      - name: Install deps (admin-api)
+        working-directory: workers/admin-api
+        run: npm ci
+
+      - name: Apply D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [[ "${{ matrix.env }}" == "stage" ]]; then DB_NAME="decision_authority_stage"; else DB_NAME="decision_authority_prod"; fi
+          npx wrangler d1 execute "$DB_NAME" --file workers/decision-api/migrations/0001_init.sql --remote
+          npx wrangler d1 execute "$DB_NAME" --file workers/decision-api/migrations/0002_admin.sql --remote
+
+      - name: Deploy decision-api
+        working-directory: workers/decision-api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy --env ${{ matrix.env }}
+
+      - name: Deploy admin-api
+        working-directory: workers/admin-api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy --env ${{ matrix.env }}

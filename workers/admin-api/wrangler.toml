@@ -1,0 +1,30 @@
+name = "admin-api"
+main = "src/index.ts"
+compatibility_date = "2026-02-22"
+
+[vars]
+ENV = "dev"
+
+[env.stage]
+vars = { ENV = "stage" }
+
+[[env.stage.d1_databases]]
+binding = "DB"
+database_name = "decision_authority_stage"
+database_id = "REPLACE_STAGE_D1_ID"
+
+[[env.stage.r2_buckets]]
+binding = "R2"
+bucket_name = "decision-authority-artifacts-stage"
+
+[env.prod]
+vars = { ENV = "prod" }
+
+[[env.prod.d1_databases]]
+binding = "DB"
+database_name = "decision_authority_prod"
+database_id = "REPLACE_PROD_D1_ID"
+
+[[env.prod.r2_buckets]]
+binding = "R2"
+bucket_name = "decision-authority-artifacts-prod"

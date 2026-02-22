@@ -1,0 +1,27 @@
+{
+  "id": "conformance_checklist",
+  "version": "v1",
+  "created_at": "2026-02-22",
+  "checks": [
+    {
+      "id": "CC-01",
+      "name": "Required artifacts present",
+      "pass_if": "micro_case && trigger_spec && gating_rules && outcome_contract"
+    },
+    {
+      "id": "CC-02",
+      "name": "Triggers have formulas and thresholds",
+      "pass_if": "forall(metrics, formula && threshold && measurement_window)"
+    },
+    {
+      "id": "CC-03",
+      "name": "Gating rules have PASS/FAIL actions",
+      "pass_if": "forall(tranches, actions_if_pass && actions_if_fail)"
+    },
+    {
+      "id": "CC-04",
+      "name": "Fail-closed mapping defined",
+      "pass_if": "fail_closed_mapping.version != null"
+    }
+  ]
+}
