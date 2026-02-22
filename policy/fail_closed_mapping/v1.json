@@ -1,0 +1,22 @@
+{
+  "id": "fail_closed_mapping",
+  "version": "v1",
+  "created_at": "2026-02-22",
+  "stop_conditions": [
+    {
+      "code": "CFO-02",
+      "when": "missing trigger formula/window/threshold",
+      "outcome": "NEEDS_INPUT"
+    },
+    {
+      "code": "CFO-03",
+      "when": "missing gating rules",
+      "outcome": "REJECTED"
+    },
+    {
+      "code": "CFO-01",
+      "when": "units mismatch (runway calc cannot be computed)",
+      "outcome": "NEEDS_INPUT"
+    }
+  ]
+}
