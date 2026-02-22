@@ -11,27 +11,21 @@ permissions:
 jobs:
   deploy-stage:
     name: Deploy (stage)
+    if: ${{ github.ref_type == 'branch' }}
     runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
-
-    concurrency:
-      group: deploy-stage
-      cancel-in-progress: true
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install deps (decision-api)
         working-directory: workers/decision-api
-        run: npm install
+        run: npm ci
 
       - name: Install deps (admin-api)
         working-directory: workers/admin-api
-        run: npm install
+        run: npm ci
 
       - name: Apply D1 migrations (stage)
         env:
@@ -59,27 +53,21 @@ jobs:
 
   deploy-prod:
     name: Deploy (prod)
+    if: ${{ github.ref_type == 'tag' }}
     runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
-
-    concurrency:
-      group: deploy-prod
-      cancel-in-progress: true
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install deps (decision-api)
         working-directory: workers/decision-api
-        run: npm install
+        run: npm ci
 
       - name: Install deps (admin-api)
         working-directory: workers/admin-api
-        run: npm install
+        run: npm ci
 
       - name: Apply D1 migrations (prod)
         env:
