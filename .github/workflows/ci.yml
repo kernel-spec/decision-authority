@@ -30,7 +30,7 @@ jobs:
           node-version: 20
       - name: Install
         working-directory: workers/${{ matrix.worker }}
-        run: npm ci
+        run: npm install
       - name: Typecheck
         working-directory: workers/${{ matrix.worker }}
         run: npm run typecheck
