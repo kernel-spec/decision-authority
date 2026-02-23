@@ -1,0 +1,24 @@
+id: vsf-TEST-CFO-001.compatibility_policy
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["all published artifacts"]
+invariants:
+  - "Any change to trigger IDs, reason codes, or gate semantics is BREAKING."
+  - "Minor versions may add non-breaking optional fields only."
+  - "Patch versions may fix typos or clarify text without changing machine semantics."
+hash: "HASH_TODO"
+
+semver_rules:
+  breaking_changes:
+    - "Change/remove trigger IDs T1..T8"
+    - "Change critical_triggers set"
+    - "Modify blocked_if/allowed_if logic or required signoffs"
+    - "Change reason_code meanings or outcomes mapping"
+    - "Change unit normalization rules"
+  non_breaking_changes:
+    - "Add new non-critical triggers (not referenced by gates) with unique IDs"
+    - "Add explanatory notes fields"
+  patch_changes:
+    - "Spelling/formatting that does not change parsing or thresholds"

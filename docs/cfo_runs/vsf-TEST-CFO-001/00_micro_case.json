@@ -1,0 +1,66 @@
+{
+  "micro_case": {
+    "company_profile": {
+      "type": "B2B SaaS",
+      "arr_current_usd": { "point_estimate": 9000000, "range": [8500000, 9500000] },
+      "gross_margin_pct": { "point_estimate": 74, "range": [72, 76] },
+      "growth_narrative_requirement": "Maintain credible growth story while reaching breakeven within 12 months",
+      "board_mandate": "Breakeven in 12 months (define metric explicitly) without breaking growth narrative"
+    },
+    "decision_objective": {
+      "primary": "Achieve breakeven within 12 months via governed triggers and phased operating plan",
+      "secondary": [
+        "Preserve or improve retention and product momentum",
+        "Maintain pipeline health and predictable revenue growth"
+      ],
+      "breakeven_definition_options": [
+        { "metric": "FCF breakeven", "definition": "Operating cash flow - capex >= 0 over trailing 3-month average" },
+        { "metric": "EBITDA breakeven", "definition": "EBITDA >= 0 over trailing 3-month average" }
+      ]
+    },
+    "baseline_financial_model_assumptions": {
+      "arr_to_revenue_recognition_lag": { "description": "Assume revenue ~ ARR on run-rate basis", "range_months": [0, 2] },
+      "opex_current_usd_per_month": { "range": [900000, 1300000], "notes": "All-in operating expenses excluding COGS; placeholder until actuals loaded" },
+      "net_burn_current_usd_per_month": { "range": [200000, 800000], "notes": "Placeholder; actuals to replace in first operating cycle" },
+      "cash_on_hand_usd": { "range": [6000000, 15000000], "notes": "Unknown; must be filled to calibrate runway triggers" }
+    },
+    "operating_context_assumptions": {
+      "go_to_market_mix": { "assumption": "Sales-led with some self-serve expansion", "confidence": "medium" },
+      "customer_profile": { "assumption": "Mid-market / SMB B2B", "confidence": "low" },
+      "pricing_packaging": { "assumption": "Opportunity for packaging/price uplift exists", "confidence": "medium" }
+    },
+    "key_levers": {
+      "revenue_levers": [
+        "NRR improvement via churn reduction + expansion motions",
+        "Pipeline conversion & sales cycle reduction",
+        "Pricing/packaging and discount discipline",
+        "Channel efficiency and segment focus"
+      ],
+      "cost_levers": [
+        "GTM efficiency (CAC payback, quota capacity right-sizing)",
+        "R&D focus (reduce non-core spend, improve release ROI)",
+        "G&A rationalization (tools, contractors, overhead)",
+        "Cloud/infra and COGS optimization (without GM degradation)"
+      ]
+    },
+    "constraints_and_non_negotiables": {
+      "non_negotiables": [
+        "Do not materially degrade customer experience or retention",
+        "Do not cut roadmap items tied to retention/NRR",
+        "Maintain credible growth guidance supported by leading indicators",
+        "No fake precision: all targets expressed as ranges and verified monthly"
+      ],
+      "guardrails": [
+        "NRR must not fall below defined floor",
+        "Pipeline coverage must not fall below defined floor",
+        "Gross margin must not fall below defined floor"
+      ]
+    },
+    "deliverables_from_this_run": [
+      "Trigger specification (what to measure, formulas, windows, actions)",
+      "Gating rules (what is allowed/blocked by signal state)",
+      "Outcome contract (definitions, cadence, owners, reporting, escalation)",
+      "Board memo draft (decision narrative + plan + risks)"
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "outcome_contract": {
+    "breakeven_definition_selected": {
+      "preferred": "FCF breakeven",
+      "alternate": "EBITDA breakeven",
+      "selection_rule": "Use FCF as primary; report EBITDA as secondary; if cash volatility is high, emphasize EBITDA trajectory plus runway floor"
+    },
+    "success_criteria": {
+      "by_month_12": [
+        { "metric": "FCF_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+        { "metric": "EBITDA_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+        { "metric": "NRR", "target_range": [105, 120], "unit": "percent" },
+        { "metric": "GrossMargin", "target_range": [72, 78], "unit": "percent" }
+      ],
+      "narrative_integrity": [
+        { "metric": "Ro40", "target_range": [30, 45], "unit": "percent" },
+        { "metric": "PipelineCoverage", "target_range": [3.0, 4.5], "unit": "x" }
+      ]
+    },
+    "operating_cadence": {
+      "weekly": {
+        "forum": "CFO Operating Review",
+        "duration_minutes": 45,
+        "agenda": [
+          "Trigger dashboard (T4 runway, T6 pipeline, spend vs budget)",
+          "Actions from last week and owners",
+          "Exceptions requested (gates) and approvals/denials"
+        ],
+        "attendees": ["CFO", "CEO", "Head of Sales", "Head of Marketing", "Head of Product/Eng", "RevOps/FP&A"]
+      },
+      "monthly": {
+        "forum": "Close + Board Pack Prep",
+        "deliverables": [
+          "Monthly trigger status and trends",
+          "Forecast update (base / downside / upside ranges)",
+          "Decision log of gate exceptions and ROI outcomes"
+        ],
+        "timing": "Within 7 business days of month-end close"
+      },
+      "quarterly": {
+        "forum": "Board Meeting",
+        "deliverables": [
+          "Trajectory vs breakeven path",
+          "Efficiency narrative (Ro40, CAC payback, NRR)",
+          "Strategic tradeoffs and next-quarter gated budget"
+        ]
+      }
+    },
+    "owners_and_accountability": {
+      "metric_owners": {
+        "T1_T2": "CFO (FP&A)",
+        "T4": "CFO + Controller/Treasury",
+        "T5": "Head of CS + Product",
+        "T6_T7": "Head of Sales + RevOps",
+        "T8": "VP Eng/Infra + CFO"
+      },
+      "gate_approvers": {
+        "G1": ["CFO", "CEO"],
+        "G2": ["CFO", "Head of Sales/Marketing"],
+        "G3": ["CPO/CTO", "CFO"],
+        "G4": ["CFO"]
+      }
+    },
+    "data_requirements": {
+      "systems": ["Accounting/ERP", "CRM", "Billing/Subscriptions", "Data warehouse (if exists)"],
+      "minimum_fields": [
+        "ARR bridge (start, new, expansion, contraction, churn)",
+        "COGS breakdown (cloud, support, other)",
+        "Opex by function (R&D, S&M, G&A) and fixed vs variable",
+        "Pipeline stages and definitions; bookings target",
+        "Headcount by function; fully-loaded cost assumptions"
+      ],
+      "data_quality_sla": {
+        "close_timeliness_days": { "range": [5, 10] },
+        "crm_hygiene": "Stage definitions enforced; required fields for qualification"
+      }
+    },
+    "fail_closed_policy": {
+      "default_state": "If any critical trigger is FAIL, system enters DEFENSIVE mode until two consecutive PASS cycles",
+      "defensive_mode_actions": [
+        "Hiring freeze except retention-critical",
+        "Discretionary spend reduction 10–25%",
+        "Weekly cash focus and collections push",
+        "Reallocation of GTM spend to proven ROI or retention"
+      ]
+    }
+  }
+}

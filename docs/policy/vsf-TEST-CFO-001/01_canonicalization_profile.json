@@ -1,0 +1,81 @@
+{
+  "id": "vsf-TEST-CFO-001.canonicalization_profile",
+  "version": "1.0.0",
+  "created_at": "2026-02-23T00:00:00Z",
+  "scope": {
+    "trace_id": "vsf-TEST-CFO-001",
+    "applies_to": [
+      "micro_case",
+      "trigger_spec",
+      "gating_rules",
+      "outcome_contract",
+      "runtime_enforcement_contract"
+    ]
+  },
+  "invariants": [
+    "Canonicalization MUST be deterministic and lossless over semantically meaningful content.",
+    "Normalization MUST NOT invent values; it may only normalize formats/aliases.",
+    "Fail-closed behavior MUST be preserved under canonicalization."
+  ],
+  "hash": "HASH_TODO",
+  "profile": {
+    "json_canonicalization": {
+      "encoding": "UTF-8",
+      "object_key_order": "lexicographic",
+      "number_representation": "preserve_numeric_type",
+      "strip_trailing_whitespace_in_strings": true,
+      "newline": "\n"
+    },
+    "unit_normalization": {
+      "money": {
+        "canonical_unit": "USD",
+        "aliases": ["$", "USD"],
+        "rendering": "USD"
+      },
+      "percent": {
+        "canonical_unit": "percent",
+        "scale": "0-100",
+        "rendering": "percent"
+      },
+      "multiplier": {
+        "canonical_unit": "x",
+        "aliases": ["x", "X"],
+        "rendering": "x"
+      },
+      "time": {
+        "allowed": ["days", "weeks", "months"],
+        "rendering": "as_stated"
+      }
+    },
+    "threshold_normalization": {
+      "goal": "machine-normalizable comparator sets",
+      "accepted_patterns": [
+        ">= N",
+        "<= N",
+        "> N",
+        "< N",
+        "N1 to N2",
+        "between N1 and N2",
+        "range N1–N2"
+      ],
+      "currency_shorthand": {
+        "k": 1000,
+        "m": 1000000
+      },
+      "interval_semantics": {
+        "example": "TrajectoryGap >= -50000 and <= 50000",
+        "inclusive_bounds_default": true
+      }
+    },
+    "metric_name_alignment": {
+      "canonical_metric_names": {
+        "GrossMargin": ["gross_margin", "gross_margin_pct", "GM"],
+        "NRR": ["nrr", "net_revenue_retention"],
+        "PipelineCoverage": ["pipeline_coverage", "PipelineCoverage"],
+        "Ro40": ["rule_of_40", "Ro40"],
+        "FCF_3mo_avg": ["FCF_3mo_avg"],
+        "EBITDA_3mo_avg": ["EBITDA_3mo_avg"]
+      }
+    }
+  }
+}

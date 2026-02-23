@@ -1,0 +1,598 @@
+{
+  "id": "vsf-TEST-CFO-001.outcome_contract_bundle",
+  "version": "1.0.0",
+  "created_at": "2026-02-23T00:00:00Z",
+  "scope": {
+    "trace_id": "vsf-TEST-CFO-001",
+    "includes": [
+      "micro_case",
+      "trigger_spec",
+      "gating_rules",
+      "outcome_contract",
+      "runtime_enforcement_contract",
+      "reason_codes_taxonomy",
+      "runtime_response_mapping",
+      "minimal_validation_report_schema"
+    ]
+  },
+  "invariants": [
+    "Bundle content is a direct publication wrapper around provided CFO JSON blocks and enforcement contract text, without redesign.",
+    "Fail-closed enforcement is normative; missing inputs yield NEEDS_INPUT per reason codes.",
+    "All targets in success_criteria are ranges (bands over points)."
+  ],
+  "hash": "HASH_TODO",
+  "bundle": {
+    "micro_case": {
+      "micro_case": {
+        "company_profile": {
+          "type": "B2B SaaS",
+          "arr_current_usd": { "point_estimate": 9000000, "range": [8500000, 9500000] },
+          "gross_margin_pct": { "point_estimate": 74, "range": [72, 76] },
+          "growth_narrative_requirement": "Maintain credible growth story while reaching breakeven within 12 months",
+          "board_mandate": "Breakeven in 12 months (define metric explicitly) without breaking growth narrative"
+        },
+        "decision_objective": {
+          "primary": "Achieve breakeven within 12 months via governed triggers and phased operating plan",
+          "secondary": [
+            "Preserve or improve retention and product momentum",
+            "Maintain pipeline health and predictable revenue growth"
+          ],
+          "breakeven_definition_options": [
+            { "metric": "FCF breakeven", "definition": "Operating cash flow - capex >= 0 over trailing 3-month average" },
+            { "metric": "EBITDA breakeven", "definition": "EBITDA >= 0 over trailing 3-month average" }
+          ]
+        },
+        "baseline_financial_model_assumptions": {
+          "arr_to_revenue_recognition_lag": { "description": "Assume revenue ~ ARR on run-rate basis", "range_months": [0, 2] },
+          "opex_current_usd_per_month": { "range": [900000, 1300000], "notes": "All-in operating expenses excluding COGS; placeholder until actuals loaded" },
+          "net_burn_current_usd_per_month": { "range": [200000, 800000], "notes": "Placeholder; actuals to replace in first operating cycle" },
+          "cash_on_hand_usd": { "range": [6000000, 15000000], "notes": "Unknown; must be filled to calibrate runway triggers" }
+        },
+        "operating_context_assumptions": {
+          "go_to_market_mix": { "assumption": "Sales-led with some self-serve expansion", "confidence": "medium" },
+          "customer_profile": { "assumption": "Mid-market / SMB B2B", "confidence": "low" },
+          "pricing_packaging": { "assumption": "Opportunity for packaging/price uplift exists", "confidence": "medium" }
+        },
+        "key_levers": {
+          "revenue_levers": [
+            "NRR improvement via churn reduction + expansion motions",
+            "Pipeline conversion & sales cycle reduction",
+            "Pricing/packaging and discount discipline",
+            "Channel efficiency and segment focus"
+          ],
+          "cost_levers": [
+            "GTM efficiency (CAC payback, quota capacity right-sizing)",
+            "R&D focus (reduce non-core spend, improve release ROI)",
+            "G&A rationalization (tools, contractors, overhead)",
+            "Cloud/infra and COGS optimization (without GM degradation)"
+          ]
+        },
+        "constraints_and_non_negotiables": {
+          "non_negotiables": [
+            "Do not materially degrade customer experience or retention",
+            "Do not cut roadmap items tied to retention/NRR",
+            "Maintain credible growth guidance supported by leading indicators",
+            "No fake precision: all targets expressed as ranges and verified monthly"
+          ],
+          "guardrails": [
+            "NRR must not fall below defined floor",
+            "Pipeline coverage must not fall below defined floor",
+            "Gross margin must not fall below defined floor"
+          ]
+        },
+        "deliverables_from_this_run": [
+          "Trigger specification (what to measure, formulas, windows, actions)",
+          "Gating rules (what is allowed/blocked by signal state)",
+          "Outcome contract (definitions, cadence, owners, reporting, escalation)",
+          "Board memo draft (decision narrative + plan + risks)"
+        ]
+      }
+    },
+    "trigger_spec": {
+      "trigger_spec": {
+        "measurement_cadence": {
+          "daily": ["cash_balance", "collections", "new_bookings (if available)"],
+          "weekly": ["pipeline_created", "pipeline_coverage", "spend_vs_budget", "headcount"],
+          "monthly_close": ["arr", "nrr", "gross_retention", "logo_churn", "gross_margin", "opex", "ebitda", "fcf", "cac_payback", "rule_of_40"]
+        },
+        "triggers": [
+          {
+            "id": "T1_FCF_BREAKEVEN_TRAJECTORY",
+            "name": "FCF trajectory to breakeven",
+            "formula": "FCF_3mo_avg = avg(OperatingCashFlow - Capex) over last 3 months; TrajectoryGap = FCF_3mo_avg - TargetFCF_3mo_avg(month_index)",
+            "threshold": {
+              "pass": "TrajectoryGap >= -$50k to +$50k",
+              "watch": "TrajectoryGap < -$50k and >= -$150k",
+              "fail": "TrajectoryGap < -$150k"
+            },
+            "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+            "action_if_pass": [
+              "Allow planned growth investments within gated budget bands",
+              "Maintain hiring plan for roles already pre-approved by gate"
+            ],
+            "action_if_fail": [
+              "Immediate spend containment: freeze non-essential hiring and backfills",
+              "Reduce discretionary spend 10–20% next month (tools/contractors/marketing experiments)",
+              "Re-forecast within 5 business days; escalate to Board chair if two consecutive fails"
+            ],
+            "variance_notes": "Use bands not point targets; allow seasonality and billing swings; reconcile with working capital movements"
+          },
+          {
+            "id": "T2_EBITDA_BREAKEVEN_TRAJECTORY",
+            "name": "EBITDA trajectory to breakeven (alternate definition)",
+            "formula": "EBITDA_3mo_avg = avg(Revenue - COGS - Opex excl D&A) over last 3 months; TrajectoryGap = EBITDA_3mo_avg - TargetEBITDA_3mo_avg(month_index)",
+            "threshold": {
+              "pass": "TrajectoryGap >= -$40k to +$40k",
+              "watch": "TrajectoryGap < -$40k and >= -$120k",
+              "fail": "TrajectoryGap < -$120k"
+            },
+            "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+            "action_if_pass": [
+              "Permit growth experiments if other guardrails pass",
+              "Continue roadmap items classified as retention-critical"
+            ],
+            "action_if_fail": [
+              "Trigger cost actions: pause low-ROI programs; reallocate to retention and proven channels",
+              "Implement approval gate for any new vendor spend >$5k/month"
+            ],
+            "variance_notes": "EBITDA ignores working capital; pair with cash triggers (T4/T5) to avoid cash surprises"
+          },
+          {
+            "id": "T3_RULE_OF_40_GUARDRAIL",
+            "name": "Rule of 40 guardrail (growth narrative)",
+            "formula": "Ro40 = (ARR_Growth_Rate_TTM %) + (EBITDA_Margin_TTM %)",
+            "threshold": {
+              "pass": "Ro40 >= 30% (range 30–45%)",
+              "watch": "Ro40 >= 20% and < 30%",
+              "fail": "Ro40 < 20%"
+            },
+            "measurement_window": "Trailing 12 months, updated monthly",
+            "action_if_pass": [
+              "Use Ro40 in external narrative and board reporting as primary efficiency signal",
+              "Prioritize investments with payback <= 12–18 months"
+            ],
+            "action_if_fail": [
+              "Shift emphasis to efficiency story; cut/reshape lowest ROI acquisition spend",
+              "Mandate pricing/packaging review and discount controls within 30 days"
+            ],
+            "variance_notes": "Bands reflect market variability; select benchmark band by segment and growth stage"
+          },
+          {
+            "id": "T4_RUNWAY_FLOOR",
+            "name": "Cash runway floor",
+            "formula": "RunwayMonths = CashBalance / max(1, NetBurn_3mo_avg)",
+            "threshold": {
+              "pass": "RunwayMonths >= 15 (range 15–24)",
+              "watch": "RunwayMonths >= 12 and < 15",
+              "fail": "RunwayMonths < 12"
+            },
+            "measurement_window": "Trailing 3-month burn average, evaluated weekly and monthly",
+            "action_if_pass": ["Proceed with phased plan; keep optionality for selective investment"],
+            "action_if_fail": [
+              "Activate defensive plan: hiring freeze, renegotiate major vendors, cut discretionary spend 15–25%",
+              "Consider financing/strategic options exploration if fails for 4 consecutive weeks"
+            ],
+            "variance_notes": "Runway depends on burn volatility; use 3-month avg and also a high-burn stress case (+20–30%)"
+          },
+          {
+            "id": "T5_NET_REVENUE_RETENTION_FLOOR",
+            "name": "NRR floor (do-not-break retention)",
+            "formula": "NRR = (StartingARR + Expansion - Contraction - Churn) / StartingARR",
+            "threshold": {
+              "pass": "NRR >= 105% (range 105–120%)",
+              "watch": "NRR >= 100% and < 105%",
+              "fail": "NRR < 100%"
+            },
+            "measurement_window": "Monthly cohort-based, evaluated monthly; also 3-month rolling average",
+            "action_if_pass": [
+              "Maintain planned product/customer success investments tied to retention",
+              "Allow targeted expansion programs"
+            ],
+            "action_if_fail": [
+              "Protect CS/product capacity; pause risky changes; run churn war-room within 7 days",
+              "Reallocate GTM spend from new logo to retention until back above 100–105%"
+            ],
+            "variance_notes": "NRR varies by segment; thresholds should be calibrated to historical distribution"
+          },
+          {
+            "id": "T6_PIPELINE_COVERAGE",
+            "name": "Pipeline coverage for next-quarter bookings",
+            "formula": "PipelineCoverage = QualifiedPipelineAmount_next_quarter / BookingsTarget_next_quarter",
+            "threshold": {
+              "pass": ">= 3.0x (range 3.0–4.5x)",
+              "watch": ">= 2.0x and < 3.0x",
+              "fail": "< 2.0x"
+            },
+            "measurement_window": "Weekly snapshot; evaluate weekly trend (4-week moving average)",
+            "action_if_pass": [
+              "Maintain demand gen and SDR capacity; focus on conversion improvements"
+            ],
+            "action_if_fail": [
+              "Stop unproven channels; redirect to pipeline creation with best historical ROI",
+              "Revise bookings target or re-segment focus within 2 weeks"
+            ],
+            "variance_notes": "Coverage needed depends on win rates and cycle length; calibrate quarterly"
+          },
+          {
+            "id": "T7_CAC_PAYBACK",
+            "name": "CAC payback discipline",
+            "formula": "CACPaybackMonths = CAC / (GrossMargin * NewARR_per_month)",
+            "threshold": {
+              "pass": "<= 15 months (range 9–15)",
+              "watch": "> 15 and <= 20 months",
+              "fail": "> 20 months"
+            },
+            "measurement_window": "Quarterly cohort-based; updated monthly with trailing 3-month smoothing",
+            "action_if_pass": ["Allow scaling of efficient segments/channels within gate"],
+            "action_if_fail": [
+              "Reduce acquisition spend 10–30% in failing segments; tighten ICP and qualification",
+              "Enforce discount ceilings and pricing governance immediately"
+            ],
+            "variance_notes": "Payback is lagging; pair with leading indicators (conversion rates, ASP, sales cycle)"
+          },
+          {
+            "id": "T8_GROSS_MARGIN_FLOOR",
+            "name": "Gross margin floor",
+            "formula": "GM = (Revenue - COGS) / Revenue",
+            "threshold": {
+              "pass": ">= 72% (range 72–78%)",
+              "watch": ">= 70% and < 72%",
+              "fail": "< 70%"
+            },
+            "measurement_window": "Monthly close; 3-month rolling average",
+            "action_if_pass": [
+              "Continue investments; pursue infra optimization roadmap"
+            ],
+            "action_if_fail": [
+              "Launch COGS taskforce: cloud commitments, arch efficiency, support cost review",
+              "Pause low-margin offerings/custom deals unless approved by CFO"
+            ],
+            "variance_notes": "Account for usage spikes and one-time credits; normalize where appropriate"
+          }
+        ],
+        "target_trajectory_templates": {
+          "breakeven_in_12_months": {
+            "description": "Monthly target path for EBITDA or FCF to reach >=0 by month 12 using bands, not point targets",
+            "example_band": {
+              "month_0_gap_to_breakeven": { "range_usd_per_month": [-800000, -200000] },
+              "required_improvement_per_quarter": { "range_usd_per_month": [150000, 350000] }
+            }
+          }
+        }
+      }
+    },
+    "gating_rules": {
+      "gating_rules": {
+        "principles": [
+          "Fail-closed: if any critical guardrail fails, block discretionary growth spend and net-new headcount",
+          "Protect retention: never cut retention-critical CS/Product capacity when NRR trigger is watch/fail",
+          "Reallocate before cutting: shift from low-ROI acquisition to retention and proven channels first",
+          "Bands over points: decisions based on ranges and multi-signal corroboration"
+        ],
+        "signal_states": ["PASS", "WATCH", "FAIL"],
+        "critical_triggers": [
+          "T1_FCF_BREAKEVEN_TRAJECTORY",
+          "T4_RUNWAY_FLOOR",
+          "T5_NET_REVENUE_RETENTION_FLOOR",
+          "T8_GROSS_MARGIN_FLOOR"
+        ],
+        "gates": [
+          {
+            "gate_id": "G1_HEADCOUNT",
+            "scope": "Net-new hires and backfills",
+            "allowed_if": [
+              {
+                "when": "All critical_triggers are PASS",
+                "allow": "Proceed with approved hiring plan; add up to +1–2 critical roles/month if Ro40 is PASS and CAC payback is PASS"
+              },
+              {
+                "when": "Any critical_trigger is WATCH",
+                "allow": "Backfills only + explicitly retention-critical roles; CFO approval required"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "Any critical_trigger is FAIL",
+                "block": "All net-new hires and non-critical backfills; exception requires CEO+CFO signoff and written ROI case"
+              }
+            ],
+            "exceptions": {
+              "retention_protection": "If T5 is WATCH/FAIL, CS/Product roles that directly mitigate churn are allowed even during cost containment, but must be offset by cuts elsewhere"
+            }
+          },
+          {
+            "gate_id": "G2_GTM_SPEND",
+            "scope": "Marketing + sales variable spend, tools, agencies",
+            "allowed_if": [
+              {
+                "when": "T7_CAC_PAYBACK PASS and T6_PIPELINE_COVERAGE PASS and (T1 or T2) is PASS/WATCH",
+                "allow": "Scale spend +5–15% in proven segments; keep experiment budget capped (2–5% of GTM spend)"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "T7 FAIL or T6 FAIL",
+                "block": "Freeze scaling; cut lowest ROI channels 10–30%; require channel-level ROI proof for reinstatement"
+              },
+              {
+                "when": "T1 FAIL and T4 WATCH/FAIL",
+                "block": "Immediate discretionary GTM spend freeze except for commitments; re-approve monthly"
+              }
+            ],
+            "required_controls": [
+              "Discount governance: set discount ceilings by segment; CFO approval for exceptions",
+              "Quota capacity check: ensure rep capacity aligns with pipeline coverage thresholds"
+            ]
+          },
+          {
+            "gate_id": "G3_PRODUCT_AND_RND",
+            "scope": "Roadmap, engineering spend, contractors",
+            "allowed_if": [
+              {
+                "when": "T5 PASS or WATCH",
+                "allow": "Prioritize retention-critical roadmap; limit new big-bet initiatives to those with quantified retention or upsell impact"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "T1 FAIL and T5 PASS",
+                "block": "Pause non-core R&D; focus on cost-to-serve, reliability, and upsell enablers"
+              },
+              {
+                "when": "T5 FAIL",
+                "block": "Block any roadmap that risks churn; mandate churn-reduction tiger team and reliability focus"
+              }
+            ]
+          },
+          {
+            "gate_id": "G4_VENDOR_AND_NON_LABOR",
+            "scope": "All non-labor spend (software, cloud commitments, contractors outside product)",
+            "allowed_if": [
+              {
+                "when": "T1 PASS and T4 PASS",
+                "allow": "Renewals allowed; new spend requires ROI case if >$5k/month"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "T4 WATCH/FAIL",
+                "block": "Renegotiate top vendors; approve only mission-critical spend; target 10–20% savings within 60 days"
+              }
+            ]
+          }
+        ],
+        "escalation_rules": [
+          {
+            "condition": "Two consecutive monthly FAILs on T1/T2",
+            "action": "Board-level review; adopt stronger cost program; revise guidance narrative"
+          },
+          {
+            "condition": "Four consecutive weekly FAILs on T4",
+            "action": "Activate financing/strategic options workstream; implement immediate burn reduction plan"
+          }
+        ]
+      }
+    },
+    "outcome_contract": {
+      "outcome_contract": {
+        "breakeven_definition_selected": {
+          "preferred": "FCF breakeven",
+          "alternate": "EBITDA breakeven",
+          "selection_rule": "Use FCF as primary; report EBITDA as secondary; if cash volatility is high, emphasize EBITDA trajectory plus runway floor"
+        },
+        "success_criteria": {
+          "by_month_12": [
+            { "metric": "FCF_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+            { "metric": "EBITDA_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+            { "metric": "NRR", "target_range": [105, 120], "unit": "percent" },
+            { "metric": "GrossMargin", "target_range": [72, 78], "unit": "percent" }
+          ],
+          "narrative_integrity": [
+            { "metric": "Ro40", "target_range": [30, 45], "unit": "percent" },
+            { "metric": "PipelineCoverage", "target_range": [3.0, 4.5], "unit": "x" }
+          ]
+        },
+        "operating_cadence": {
+          "weekly": {
+            "forum": "CFO Operating Review",
+            "duration_minutes": 45,
+            "agenda": [
+              "Trigger dashboard (T4 runway, T6 pipeline, spend vs budget)",
+              "Actions from last week and owners",
+              "Exceptions requested (gates) and approvals/denials"
+            ],
+            "attendees": ["CFO", "CEO", "Head of Sales", "Head of Marketing", "Head of Product/Eng", "RevOps/FP&A"]
+          },
+          "monthly": {
+            "forum": "Close + Board Pack Prep",
+            "deliverables": [
+              "Monthly trigger status and trends",
+              "Forecast update (base / downside / upside ranges)",
+              "Decision log of gate exceptions and ROI outcomes"
+            ],
+            "timing": "Within 7 business days of month-end close"
+          },
+          "quarterly": {
+            "forum": "Board Meeting",
+            "deliverables": [
+              "Trajectory vs breakeven path",
+              "Efficiency narrative (Ro40, CAC payback, NRR)",
+              "Strategic tradeoffs and next-quarter gated budget"
+            ]
+          }
+        },
+        "owners_and_accountability": {
+          "metric_owners": {
+            "T1_T2": "CFO (FP&A)",
+            "T4": "CFO + Controller/Treasury",
+            "T5": "Head of CS + Product",
+            "T6_T7": "Head of Sales + RevOps",
+            "T8": "VP Eng/Infra + CFO"
+          },
+          "gate_approvers": {
+            "G1": ["CFO", "CEO"],
+            "G2": ["CFO", "Head of Sales/Marketing"],
+            "G3": ["CPO/CTO", "CFO"],
+            "G4": ["CFO"]
+          }
+        },
+        "data_requirements": {
+          "systems": ["Accounting/ERP", "CRM", "Billing/Subscriptions", "Data warehouse (if exists)"],
+          "minimum_fields": [
+            "ARR bridge (start, new, expansion, contraction, churn)",
+            "COGS breakdown (cloud, support, other)",
+            "Opex by function (R&D, S&M, G&A) and fixed vs variable",
+            "Pipeline stages and definitions; bookings target",
+            "Headcount by function; fully-loaded cost assumptions"
+          ],
+          "data_quality_sla": {
+            "close_timeliness_days": { "range": [5, 10] },
+            "crm_hygiene": "Stage definitions enforced; required fields for qualification"
+          }
+        },
+        "fail_closed_policy": {
+          "default_state": "If any critical trigger is FAIL, system enters DEFENSIVE mode until two consecutive PASS cycles",
+          "defensive_mode_actions": [
+            "Hiring freeze except retention-critical",
+            "Discretionary spend reduction 10–25%",
+            "Weekly cash focus and collections push",
+            "Reallocation of GTM spend to proven ROI or retention"
+          ]
+        }
+      }
+    },
+    "runtime_enforcement_contract": {
+      "id": "vsf-TEST-CFO-001.runtime_enforcement_contract",
+      "version": "1.0.0",
+      "created_at": "2026-02-23T00:00:00Z",
+      "scope": { "trace_id": "vsf-TEST-CFO-001" },
+      "invariants": [
+        "Fail-closed ingress and enforcement per RUNTIME-A1..A10.",
+        "Reason codes CFO-01..CFO-35 are normative.",
+        "Decision logging is a hard stop (no log => REJECTED)."
+      ],
+      "hash": "HASH_TODO",
+      "content_md": "# Runtime Enforcement Contract v1 (CFO) — vsf-TEST-CFO-001\n\n(Verbatim contract is published at docs/enforcement/vsf-TEST-CFO-001/runtime_enforcement_contract_v1.md)\n"
+    },
+    "reason_codes_taxonomy": {
+      "CFO-01": "Missing required artifact(s) (NEEDS_INPUT)",
+      "CFO-02": "JSON parse error (REJECTED)",
+      "CFO-03": "Wrong root shape / missing expected root object (REJECTED)",
+      "CFO-04": "Trigger missing required fields (REJECTED)",
+      "CFO-05": "Threshold not machine-normalizable (REJECTED)",
+      "CFO-06": "Measurement window/formula mismatch (REJECTED)",
+      "CFO-07": "Units mismatch between triggers and outcome criteria (REJECTED)",
+      "CFO-08": "Point target without range (REJECTED)",
+      "CFO-09": "Missing “no fake precision” non-negotiable (NEEDS_INPUT)",
+      "CFO-10": "Breakeven preference/alternate mismatch (REJECTED)",
+      "CFO-11": "Missing T1 or T2 trigger (REJECTED)",
+      "CFO-12": "Missing cash inputs for runway computation at runtime (NEEDS_INPUT)",
+      "CFO-13": "Duplicate trigger IDs (REJECTED)",
+      "CFO-14": "Gating references unknown trigger IDs (REJECTED)",
+      "CFO-15": "Cadence category mismatch (REJECTED)",
+      "CFO-16": "Missing inputs for CRITICAL trigger evaluation (NEEDS_INPUT)",
+      "CFO-17": "Missing inputs for NON-critical trigger evaluation (NEEDS_INPUT)",
+      "CFO-18": "Invalid signal_states set (REJECTED)",
+      "CFO-19": "Invalid/empty critical_triggers list (REJECTED)",
+      "CFO-20": "Headcount request missing classification (NEEDS_INPUT)",
+      "CFO-21": "Headcount exception missing signoff/ROI (REJECTED)",
+      "CFO-22": "GTM spend request missing required details (NEEDS_INPUT)",
+      "CFO-23": "Discount exception missing CFO approval (REJECTED)",
+      "CFO-24": "Roadmap item missing classification/quantified impact (NEEDS_INPUT)",
+      "CFO-25": "Roadmap approval risks churn while T5 FAIL (REJECTED)",
+      "CFO-26": "Vendor spend >$5k/mo missing ROI case (REJECTED)",
+      "CFO-27": "Vendor approval under low runway without mission-critical justification (REJECTED)",
+      "CFO-28": "Not entering DEFENSIVE mode on critical FAIL (REJECTED)",
+      "CFO-29": "Exiting DEFENSIVE mode without two PASS cycles (REJECTED)",
+      "CFO-30": "Escalation event not emitted when condition met (REJECTED)",
+      "CFO-31": "Missing minimum required data fields (NEEDS_INPUT)",
+      "CFO-32": "Close timeliness outside SLA but treated as final (REJECTED)",
+      "CFO-33": "CRM hygiene insufficient for pipeline-based gating (NEEDS_INPUT)",
+      "CFO-34": "Missing decision log entry (REJECTED)",
+      "CFO-35": "Retention exception without offset cuts documented (REJECTED)"
+    },
+    "runtime_response_mapping": {
+      "NEEDS_INPUT": ["CFO-01", "CFO-09", "CFO-12", "CFO-16", "CFO-17", "CFO-20", "CFO-22", "CFO-24", "CFO-31", "CFO-33"],
+      "REJECTED": [
+        "CFO-02",
+        "CFO-03",
+        "CFO-04",
+        "CFO-05",
+        "CFO-06",
+        "CFO-07",
+        "CFO-08",
+        "CFO-10",
+        "CFO-11",
+        "CFO-13",
+        "CFO-14",
+        "CFO-15",
+        "CFO-18",
+        "CFO-19",
+        "CFO-21",
+        "CFO-23",
+        "CFO-25",
+        "CFO-26",
+        "CFO-27",
+        "CFO-28",
+        "CFO-29",
+        "CFO-30",
+        "CFO-32",
+        "CFO-34",
+        "CFO-35"
+      ]
+    },
+    "minimal_validation_report_schema": {
+      "trace_id": "vsf-TEST-CFO-001",
+      "timestamp_utc": "YYYY-MM-DDTHH:MM:SSZ",
+      "artifacts_present": {
+        "micro_case": true,
+        "trigger_spec": true,
+        "gating_rules": true,
+        "outcome_contract": true
+      },
+      "normalization": {
+        "unit_normalization": {
+          "USD_aliases": ["$", "USD"],
+          "percent_scale": "0-100",
+          "multipliers": ["x"]
+        },
+        "thresholds_parsed": [
+          { "trigger_id": "T1_FCF_BREAKEVEN_TRAJECTORY", "parsed": true, "notes": "" }
+        ]
+      },
+      "trigger_evaluation": [
+        {
+          "trigger_id": "T4_RUNWAY_FLOOR",
+          "state": "PASS|WATCH|FAIL|UNKNOWN",
+          "inputs_missing": ["CashBalance"],
+          "computed_values": { "RunwayMonths": null }
+        }
+      ],
+      "gate_decisions": [
+        {
+          "request_id": "REQ-123",
+          "gate_id": "G1_HEADCOUNT",
+          "decision": "ALLOWED|BLOCKED",
+          "basis": {
+            "critical_triggers": { "T1": "PASS", "T4": "WATCH", "T5": "PASS", "T8": "PASS" },
+            "noncritical_triggers": { "T6": "PASS", "T7": "PASS", "T3": "WATCH" }
+          },
+          "exceptions_used": [
+            { "exception_id": "retention_protection", "offset_documented": false }
+          ],
+          "signoffs": ["CFO"],
+          "roi_case_attached": true,
+          "reason_codes": ["CFO-35"]
+        }
+      ],
+      "escalations_emitted": [
+        { "rule": "Two consecutive monthly FAILs on T1/T2", "emitted": false }
+      ],
+      "decision_log_written": true,
+      "final_outcome": {
+        "outcome": "NEEDS_INPUT|REJECTED",
+        "reason_codes": ["CFO-16"]
+      }
+    }
+  }
+}

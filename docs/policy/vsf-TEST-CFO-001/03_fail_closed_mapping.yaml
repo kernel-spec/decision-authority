@@ -1,0 +1,45 @@
+id: vsf-TEST-CFO-001.fail_closed_mapping
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["runtime_enforcement_contract", "gate_enforcement", "trigger_evaluation"]
+invariants:
+  - "If a required artifact/input is missing, enforcement outcome MUST be NEEDS_INPUT (recoverable) unless parsing/shape invalid."
+  - "If any critical trigger evaluates to FAIL or UNKNOWN, system MUST behave defensively (fail-closed)."
+  - "UNKNOWN trigger state MUST be treated as FAIL for gating (internal), while outcome may be NEEDS_INPUT externally."
+hash: "HASH_TODO"
+
+mapping:
+  missing_required_artifact:
+    condition: "any of micro_case/trigger_spec/gating_rules/outcome_contract absent"
+    reason_code: "CFO-01"
+    outcome: "NEEDS_INPUT"
+  parse_error:
+    condition: "JSON parse error"
+    reason_code: "CFO-02"
+    outcome: "REJECTED"
+  wrong_root_shape:
+    condition: "missing expected root object micro_case.micro_case etc."
+    reason_code: "CFO-03"
+    outcome: "REJECTED"
+  missing_required_trigger_fields:
+    condition: "trigger missing id/name/formula/threshold/window/actions"
+    reason_code: "CFO-04"
+    outcome: "REJECTED"
+  threshold_not_normalizable:
+    condition: "threshold cannot be parsed into comparator(s)+numeric(s)+unit"
+    reason_code: "CFO-05"
+    outcome: "REJECTED"
+  critical_input_missing_at_runtime:
+    condition: "any required input missing for critical triggers T1/T4/T5/T8"
+    reason_code: "CFO-16"
+    outcome: "NEEDS_INPUT"
+  noncritical_input_missing_at_runtime:
+    condition: "any required input missing for non-critical triggers"
+    reason_code: "CFO-17"
+    outcome: "NEEDS_INPUT"
+  critical_fail_or_unknown:
+    condition: "any critical trigger state in {FAIL, UNKNOWN}"
+    enforcement_mode: "DEFENSIVE"
+    gate_behavior: "BLOCK discretionary growth spend and net-new headcount except explicit retention_protection with offset"

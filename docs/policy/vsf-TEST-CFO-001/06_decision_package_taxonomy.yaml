@@ -1,0 +1,32 @@
+id: vsf-TEST-CFO-001.decision_package_taxonomy
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  package_types:
+    - micro_case
+    - trigger_spec
+    - gating_rules
+    - outcome_contract
+    - runtime_enforcement_contract
+invariants:
+  - "The Worker MUST ingest exactly four core artifacts: micro_case, trigger_spec, gating_rules, outcome_contract."
+  - "Runtime enforcement contract is optional for ingestion but included in this publication set."
+hash: "HASH_TODO"
+
+taxonomy:
+  micro_case:
+    purpose: "Business context + objectives + constraints + baseline assumptions"
+    required_root: "micro_case"
+  trigger_spec:
+    purpose: "Metrics, formulas, thresholds, windows, cadence, actions"
+    required_root: "trigger_spec"
+  gating_rules:
+    purpose: "Allow/block decisions based on trigger states, plus escalation rules"
+    required_root: "gating_rules"
+  outcome_contract:
+    purpose: "Success criteria, cadence, owners, data requirements, fail-closed policy"
+    required_root: "outcome_contract"
+  runtime_enforcement_contract:
+    purpose: "Deterministic runtime checks, reason codes, validation report schema"
+    required_root: "text_md_or_structured_text"
