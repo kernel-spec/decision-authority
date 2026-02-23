@@ -1,83 +1,89 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Decision Authority — Control Center</title>
-  <link rel="stylesheet" href="./style.css" />
-</head>
-<body>
-  <header class="wrap">
-    <div class="badge">Decision Authority</div>
-    <h1>Control Center (Static)</h1>
-    <p class="sub">
-      Minimal static hub for your Workers stack: <b>decision-api</b> + <b>admin-api</b>.
-      Use this page for links, curl commands, and quick docs.
-    </p>
+<!-- CONTROL CENTER POLICY: GPT uses ONLY decision-api. Admin is manual only. -->
 
-    <div class="grid">
-      <a class="card" href="./docs.html">
-        <h2>Docs</h2>
-        <p>Quickstart, endpoints, payload examples, smoke tests.</p>
-      </a>
+<section>
+  <h2>Configure URLs (saved locally)</h2>
 
-      <a class="card" href="#" id="repoLink">
-        <h2>GitHub Repo</h2>
-        <p>Open the repository (configure below).</p>
-      </a>
+  <label>GitHub Repo URL</label>
+  <input id="repoUrl" placeholder="https://github.com/kernel-spec/decision-authority" />
 
-      <a class="card" href="#" id="decisionApiLink">
-        <h2>decision-api</h2>
-        <p>POST /decision-runs (configure URL below).</p>
-      </a>
+  <label>decision-api base URL (STAGE)</label>
+  <input id="decisionUrl" placeholder="https://decision-api-stage.victorain92.workers.dev" />
 
-      <a class="card" href="#" id="adminApiLink">
-        <h2>admin-api</h2>
-        <p>GET /admin/health, /admin/runs (configure URL below).</p>
-      </a>
-    </div>
-  </header>
+  <label>admin-api base URL (STAGE) (manual only)</label>
+  <input id="adminUrl" placeholder="https://admin-api-stage.victorain92.workers.dev" />
 
-  <main class="wrap">
-    <section class="panel">
-      <h2>Configure URLs (saved locally in your browser)</h2>
-      <div class="form">
-        <label>GitHub Repo URL</label>
-        <input id="repoUrl" placeholder="https://github.com/kernel-spec/decision-authority" />
+  <button onclick="saveCfg()">Save</button>
+  <button onclick="resetCfg()">Reset</button>
 
-        <label>decision-api base URL</label>
-        <input id="decisionUrl" placeholder="https://decision-api.<your-subdomain>.workers.dev" />
+  <p style="opacity:.8">
+    Note: No secrets stored. Only localStorage for URLs. Admin is manual-only (curl).
+  </p>
+</section>
 
-        <label>admin-api base URL</label>
-        <input id="adminUrl" placeholder="https://admin-api.<your-subdomain>.workers.dev" />
+<hr/>
 
-        <button id="saveBtn">Save</button>
-        <button id="resetBtn" class="secondary">Reset</button>
-      </div>
-      <p class="hint">
-        Tip: paste the Workers URLs from Cloudflare → Workers → your worker → Deployments / Triggers,
-        or use the default *.workers.dev domain.
-      </p>
-    </section>
+<section>
+  <h2>Quick Smoke Tests (SAFE)</h2>
+  <pre id="smokeSafe"></pre>
+</section>
 
-    <section class="panel">
-      <h2>Quick Smoke Tests</h2>
-      <div class="code">
-<pre><code># admin-api health
-curl -H "X-ADMIN-KEY: &lt;ADMIN_KEY&gt;" "$ADMIN_URL/admin/health"
+<section>
+  <h2>Admin (MANUAL ONLY)</h2>
+  <p><strong>Never put ADMIN_KEY into Custom GPT.</strong> Use terminal/curl only.</p>
+  <pre id="smokeAdmin"></pre>
+</section>
 
-# list runs (joined with usage_ledger once decision-api writes it)
-curl -H "X-ADMIN-KEY: &lt;ADMIN_KEY&gt;" "$ADMIN_URL/admin/runs"
-</code></pre>
-      </div>
-      <p class="hint">Full payload examples are on the Docs page.</p>
-    </section>
-  </main>
+<script>
+  const KEY = "da_cfg_v1";
+  function getCfg() {
+    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
+  }
+  function saveCfg() {
+    const cfg = {
+      repoUrl: document.getElementById("repoUrl").value.trim(),
+      decisionUrl: document.getElementById("decisionUrl").value.trim(),
+      adminUrl: document.getElementById("adminUrl").value.trim(),
+    };
+    localStorage.setItem(KEY, JSON.stringify(cfg));
+    render();
+  }
+  function resetCfg() { localStorage.removeItem(KEY); location.reload(); }
 
-  <footer class="wrap footer">
-    <span>Static hub • No secrets stored • Only localStorage for URLs</span>
-  </footer>
+  function render() {
+    const cfg = getCfg();
+    document.getElementById("repoUrl").value = cfg.repoUrl || "";
+    document.getElementById("decisionUrl").value = cfg.decisionUrl || "";
+    document.getElementById("adminUrl").value = cfg.adminUrl || "";
 
-  <script src="./app.js"></script>
-</body>
-</html>
+    const decision = (cfg.decisionUrl || "").replace(/\/+$/, "");
+    const admin = (cfg.adminUrl || "").replace(/\/+$/, "");
+
+    document.getElementById("smokeSafe").textContent =
+`# Health
+curl -s "${decision}/health" | jq
+
+# Create decision run (example payload)
+curl -s "${decision}/decision-runs" \\
+  -H "content-type: application/json" \\
+  -d '{
+    "trace_id":"vsf-YYYYMMDD-001",
+    "mode":"JOB",
+    "input_text":"PASTE JOB POST HERE",
+    "policy_version":"v1",
+    "engine_version":"v0.1.0"
+  }' | jq
+`;
+
+    document.getElementById("smokeAdmin").textContent =
+`# Admin health (manual)
+curl -s "${admin}/admin/health" \\
+  -H "x-admin-key: $ADMIN_KEY" | jq
+
+# List runs (manual)
+curl -s "${admin}/admin/runs?limit=10" \\
+  -H "x-admin-key: $ADMIN_KEY" | jq
+`;
+  }
+
+  render();
+</script>
