@@ -1,0 +1,32 @@
+id: vsf-TEST-CFO-001.reference_graph_policy
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["decision_bundle", "runtime_enforcement_contract"]
+invariants:
+  - "All references MUST resolve (e.g., critical_triggers -> trigger_spec.triggers[].id)."
+  - "No dangling references permitted."
+  - "Graph cycles are allowed only if explicitly declared (none required here)."
+hash: "HASH_TODO"
+
+reference_graph:
+  nodes:
+    - id: "micro_case"
+    - id: "trigger_spec"
+    - id: "gating_rules"
+    - id: "outcome_contract"
+    - id: "runtime_enforcement_contract"
+  edges:
+    - from: "gating_rules.critical_triggers[*]"
+      to: "trigger_spec.triggers[].id"
+      type: "must_resolve"
+    - from: "gating_rules.gates[].allowed_if[].when"
+      to: "trigger_spec.triggers[].id"
+      type: "semantic_reference"
+    - from: "outcome_contract.success_criteria[*].metric"
+      to: "trigger_spec.triggers[].id|metric_name_alignment"
+      type: "unit_alignment_reference"
+validation:
+  must_resolve_rules:
+    - "All IDs in gating_rules.critical_triggers exist in trigger_spec.triggers[].id"

@@ -1,0 +1,40 @@
+id: vsf-TEST-CFO-001.hash_coverage_map
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  coverage_goal: "Commit-ready hashing plan for deterministic verification"
+invariants:
+  - "All enforcement-relevant fields MUST be covered by hashes."
+  - "Hashes may be HASH_TODO until computed by CI; coverage map is authoritative."
+hash: "HASH_TODO"
+
+coverage:
+  canonicalization_profile:
+    file: "01_canonicalization_profile.json"
+    include: ["$"]
+  policy_files:
+    - file: "03_fail_closed_mapping.yaml"
+      include: ["$"]
+    - file: "04_compatibility_policy.yaml"
+      include: ["$"]
+    - file: "05_reference_graph_policy.yaml"
+      include: ["$"]
+    - file: "06_decision_package_taxonomy.yaml"
+      include: ["$"]
+    - file: "07_conformance_checklist.yaml"
+      include: ["$"]
+  decision_bundle:
+    file: "08_outcome_contract.json"
+    include:
+      - "$.bundle.micro_case"
+      - "$.bundle.trigger_spec"
+      - "$.bundle.gating_rules"
+      - "$.bundle.outcome_contract"
+      - "$.bundle.runtime_enforcement_contract"
+      - "$.bundle.reason_codes_taxonomy"
+      - "$.bundle.runtime_response_mapping"
+      - "$.bundle.minimal_validation_report_schema"
+notes:
+  - "README.md is informational; may be hashed but is not enforcement-critical."
+  - "Any change to trigger thresholds, critical triggers, gates, or reason codes is a breaking change."

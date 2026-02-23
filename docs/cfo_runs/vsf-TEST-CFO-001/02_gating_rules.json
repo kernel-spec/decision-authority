@@ -1,0 +1,68 @@
+{
+  "gating_rules": {
+    "principles": [
+      "Fail-closed: if any critical guardrail fails, block discretionary growth spend and net-new headcount",
+      "Protect retention: never cut retention-critical CS/Product capacity when NRR trigger is watch/fail",
+      "Reallocate before cutting: shift from low-ROI acquisition to retention and proven channels first",
+      "Bands over points: decisions based on ranges and multi-signal corroboration"
+    ],
+    "signal_states": ["PASS", "WATCH", "FAIL"],
+    "critical_triggers": ["T1_FCF_BREAKEVEN_TRAJECTORY", "T4_RUNWAY_FLOOR", "T5_NET_REVENUE_RETENTION_FLOOR", "T8_GROSS_MARGIN_FLOOR"],
+    "gates": [
+      {
+        "gate_id": "G1_HEADCOUNT",
+        "scope": "Net-new hires and backfills",
+        "allowed_if": [
+          { "when": "All critical_triggers are PASS", "allow": "Proceed with approved hiring plan; add up to +1–2 critical roles/month if Ro40 is PASS and CAC payback is PASS" },
+          { "when": "Any critical_trigger is WATCH", "allow": "Backfills only + explicitly retention-critical roles; CFO approval required" }
+        ],
+        "blocked_if": [
+          { "when": "Any critical_trigger is FAIL", "block": "All net-new hires and non-critical backfills; exception requires CEO+CFO signoff and written ROI case" }
+        ],
+        "exceptions": {
+          "retention_protection": "If T5 is WATCH/FAIL, CS/Product roles that directly mitigate churn are allowed even during cost containment, but must be offset by cuts elsewhere"
+        }
+      },
+      {
+        "gate_id": "G2_GTM_SPEND",
+        "scope": "Marketing + sales variable spend, tools, agencies",
+        "allowed_if": [
+          { "when": "T7_CAC_PAYBACK PASS and T6_PIPELINE_COVERAGE PASS and (T1 or T2) is PASS/WATCH", "allow": "Scale spend +5–15% in proven segments; keep experiment budget capped (2–5% of GTM spend)" }
+        ],
+        "blocked_if": [
+          { "when": "T7 FAIL or T6 FAIL", "block": "Freeze scaling; cut lowest ROI channels 10–30%; require channel-level ROI proof for reinstatement" },
+          { "when": "T1 FAIL and T4 WATCH/FAIL", "block": "Immediate discretionary GTM spend freeze except for commitments; re-approve monthly" }
+        ],
+        "required_controls": [
+          "Discount governance: set discount ceilings by segment; CFO approval for exceptions",
+          "Quota capacity check: ensure rep capacity aligns with pipeline coverage thresholds"
+        ]
+      },
+      {
+        "gate_id": "G3_PRODUCT_AND_RND",
+        "scope": "Roadmap, engineering spend, contractors",
+        "allowed_if": [
+          { "when": "T5 PASS or WATCH", "allow": "Prioritize retention-critical roadmap; limit new big-bet initiatives to those with quantified retention or upsell impact" }
+        ],
+        "blocked_if": [
+          { "when": "T1 FAIL and T5 PASS", "block": "Pause non-core R&D; focus on cost-to-serve, reliability, and upsell enablers" },
+          { "when": "T5 FAIL", "block": "Block any roadmap that risks churn; mandate churn-reduction tiger team and reliability focus" }
+        ]
+      },
+      {
+        "gate_id": "G4_VENDOR_AND_NON_LABOR",
+        "scope": "All non-labor spend (software, cloud commitments, contractors outside product)",
+        "allowed_if": [
+          { "when": "T1 PASS and T4 PASS", "allow": "Renewals allowed; new spend requires ROI case if >$5k/month" }
+        ],
+        "blocked_if": [
+          { "when": "T4 WATCH/FAIL", "block": "Renegotiate top vendors; approve only mission-critical spend; target 10–20% savings within 60 days" }
+        ]
+      }
+    ],
+    "escalation_rules": [
+      { "condition": "Two consecutive monthly FAILs on T1/T2", "action": "Board-level review; adopt stronger cost program; revise guidance narrative" },
+      { "condition": "Four consecutive weekly FAILs on T4", "action": "Activate financing/strategic options workstream; implement immediate burn reduction plan" }
+    ]
+  }
+}

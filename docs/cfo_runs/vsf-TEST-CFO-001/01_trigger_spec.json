@@ -1,0 +1,173 @@
+{
+  "trigger_spec": {
+    "measurement_cadence": {
+      "daily": ["cash_balance", "collections", "new_bookings (if available)"],
+      "weekly": ["pipeline_created", "pipeline_coverage", "spend_vs_budget", "headcount"],
+      "monthly_close": ["arr", "nrr", "gross_retention", "logo_churn", "gross_margin", "opex", "ebitda", "fcf", "cac_payback", "rule_of_40"]
+    },
+    "triggers": [
+      {
+        "id": "T1_FCF_BREAKEVEN_TRAJECTORY",
+        "name": "FCF trajectory to breakeven",
+        "formula": "FCF_3mo_avg = avg(OperatingCashFlow - Capex) over last 3 months; TrajectoryGap = FCF_3mo_avg - TargetFCF_3mo_avg(month_index)",
+        "threshold": {
+          "pass": "TrajectoryGap >= -$50k to +$50k",
+          "watch": "TrajectoryGap < -$50k and >= -$150k",
+          "fail": "TrajectoryGap < -$150k"
+        },
+        "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+        "action_if_pass": [
+          "Allow planned growth investments within gated budget bands",
+          "Maintain hiring plan for roles already pre-approved by gate"
+        ],
+        "action_if_fail": [
+          "Immediate spend containment: freeze non-essential hiring and backfills",
+          "Reduce discretionary spend 10–20% next month (tools/contractors/marketing experiments)",
+          "Re-forecast within 5 business days; escalate to Board chair if two consecutive fails"
+        ],
+        "variance_notes": "Use bands not point targets; allow seasonality and billing swings; reconcile with working capital movements"
+      },
+      {
+        "id": "T2_EBITDA_BREAKEVEN_TRAJECTORY",
+        "name": "EBITDA trajectory to breakeven (alternate definition)",
+        "formula": "EBITDA_3mo_avg = avg(Revenue - COGS - Opex excl D&A) over last 3 months; TrajectoryGap = EBITDA_3mo_avg - TargetEBITDA_3mo_avg(month_index)",
+        "threshold": {
+          "pass": "TrajectoryGap >= -$40k to +$40k",
+          "watch": "TrajectoryGap < -$40k and >= -$120k",
+          "fail": "TrajectoryGap < -$120k"
+        },
+        "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+        "action_if_pass": [
+          "Permit growth experiments if other guardrails pass",
+          "Continue roadmap items classified as retention-critical"
+        ],
+        "action_if_fail": [
+          "Trigger cost actions: pause low-ROI programs; reallocate to retention and proven channels",
+          "Implement approval gate for any new vendor spend >$5k/month"
+        ],
+        "variance_notes": "EBITDA ignores working capital; pair with cash triggers (T4/T5) to avoid cash surprises"
+      },
+      {
+        "id": "T3_RULE_OF_40_GUARDRAIL",
+        "name": "Rule of 40 guardrail (growth narrative)",
+        "formula": "Ro40 = (ARR_Growth_Rate_TTM %) + (EBITDA_Margin_TTM %)",
+        "threshold": {
+          "pass": "Ro40 >= 30% (range 30–45%)",
+          "watch": "Ro40 >= 20% and < 30%",
+          "fail": "Ro40 < 20%"
+        },
+        "measurement_window": "Trailing 12 months, updated monthly",
+        "action_if_pass": [
+          "Use Ro40 in external narrative and board reporting as primary efficiency signal",
+          "Prioritize investments with payback <= 12–18 months"
+        ],
+        "action_if_fail": [
+          "Shift emphasis to efficiency story; cut/reshape lowest ROI acquisition spend",
+          "Mandate pricing/packaging review and discount controls within 30 days"
+        ],
+        "variance_notes": "Bands reflect market variability; select benchmark band by segment and growth stage"
+      },
+      {
+        "id": "T4_RUNWAY_FLOOR",
+        "name": "Cash runway floor",
+        "formula": "RunwayMonths = CashBalance / max(1, NetBurn_3mo_avg)",
+        "threshold": {
+          "pass": "RunwayMonths >= 15 (range 15–24)",
+          "watch": "RunwayMonths >= 12 and < 15",
+          "fail": "RunwayMonths < 12"
+        },
+        "measurement_window": "Trailing 3-month burn average, evaluated weekly and monthly",
+        "action_if_pass": ["Proceed with phased plan; keep optionality for selective investment"],
+        "action_if_fail": [
+          "Activate defensive plan: hiring freeze, renegotiate major vendors, cut discretionary spend 15–25%",
+          "Consider financing/strategic options exploration if fails for 4 consecutive weeks"
+        ],
+        "variance_notes": "Runway depends on burn volatility; use 3-month avg and also a high-burn stress case (+20–30%)"
+      },
+      {
+        "id": "T5_NET_REVENUE_RETENTION_FLOOR",
+        "name": "NRR floor (do-not-break retention)",
+        "formula": "NRR = (StartingARR + Expansion - Contraction - Churn) / StartingARR",
+        "threshold": {
+          "pass": "NRR >= 105% (range 105–120%)",
+          "watch": "NRR >= 100% and < 105%",
+          "fail": "NRR < 100%"
+        },
+        "measurement_window": "Monthly cohort-based, evaluated monthly; also 3-month rolling average",
+        "action_if_pass": [
+          "Maintain planned product/customer success investments tied to retention",
+          "Allow targeted expansion programs"
+        ],
+        "action_if_fail": [
+          "Protect CS/product capacity; pause risky changes; run churn war-room within 7 days",
+          "Reallocate GTM spend from new logo to retention until back above 100–105%"
+        ],
+        "variance_notes": "NRR varies by segment; thresholds should be calibrated to historical distribution"
+      },
+      {
+        "id": "T6_PIPELINE_COVERAGE",
+        "name": "Pipeline coverage for next-quarter bookings",
+        "formula": "PipelineCoverage = QualifiedPipelineAmount_next_quarter / BookingsTarget_next_quarter",
+        "threshold": {
+          "pass": ">= 3.0x (range 3.0–4.5x)",
+          "watch": ">= 2.0x and < 3.0x",
+          "fail": "< 2.0x"
+        },
+        "measurement_window": "Weekly snapshot; evaluate weekly trend (4-week moving average)",
+        "action_if_pass": [
+          "Maintain demand gen and SDR capacity; focus on conversion improvements"
+        ],
+        "action_if_fail": [
+          "Stop unproven channels; redirect to pipeline creation with best historical ROI",
+          "Revise bookings target or re-segment focus within 2 weeks"
+        ],
+        "variance_notes": "Coverage needed depends on win rates and cycle length; calibrate quarterly"
+      },
+      {
+        "id": "T7_CAC_PAYBACK",
+        "name": "CAC payback discipline",
+        "formula": "CACPaybackMonths = CAC / (GrossMargin * NewARR_per_month)",
+        "threshold": {
+          "pass": "<= 15 months (range 9–15)",
+          "watch": "> 15 and <= 20 months",
+          "fail": "> 20 months"
+        },
+        "measurement_window": "Quarterly cohort-based; updated monthly with trailing 3-month smoothing",
+        "action_if_pass": ["Allow scaling of efficient segments/channels within gate"],
+        "action_if_fail": [
+          "Reduce acquisition spend 10–30% in failing segments; tighten ICP and qualification",
+          "Enforce discount ceilings and pricing governance immediately"
+        ],
+        "variance_notes": "Payback is lagging; pair with leading indicators (conversion rates, ASP, sales cycle)"
+      },
+      {
+        "id": "T8_GROSS_MARGIN_FLOOR",
+        "name": "Gross margin floor",
+        "formula": "GM = (Revenue - COGS) / Revenue",
+        "threshold": {
+          "pass": ">= 72% (range 72–78%)",
+          "watch": ">= 70% and < 72%",
+          "fail": "< 70%"
+        },
+        "measurement_window": "Monthly close; 3-month rolling average",
+        "action_if_pass": [
+          "Continue investments; pursue infra optimization roadmap"
+        ],
+        "action_if_fail": [
+          "Launch COGS taskforce: cloud commitments, arch efficiency, support cost review",
+          "Pause low-margin offerings/custom deals unless approved by CFO"
+        ],
+        "variance_notes": "Account for usage spikes and one-time credits; normalize where appropriate"
+      }
+    ],
+    "target_trajectory_templates": {
+      "breakeven_in_12_months": {
+        "description": "Monthly target path for EBITDA or FCF to reach >=0 by month 12 using bands, not point targets",
+        "example_band": {
+          "month_0_gap_to_breakeven": { "range_usd_per_month": [-800000, -200000] },
+          "required_improvement_per_quarter": { "range_usd_per_month": [150000, 350000] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,111 @@
+id: vsf-TEST-CFO-001.conformance_checklist
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["decision_bundle", "runtime_worker_validation"]
+invariants:
+  - "Checklist is machine-checkable: each item has deterministic predicate definition."
+  - "Outcomes are constrained to {PASS, FAIL} at checklist level; runtime maps to NEEDS_INPUT/REJECTED per reason codes."
+hash: "HASH_TODO"
+
+machine_checkable: true
+checklist:
+  - check_id: "CC-01"
+    description: "All four required artifacts present (fail-closed ingress)."
+    input_paths:
+      - "$.bundle.micro_case"
+      - "$.bundle.trigger_spec"
+      - "$.bundle.gating_rules"
+      - "$.bundle.outcome_contract"
+    predicate: "all_present_non_null"
+    on_fail:
+      reason_code: "CFO-01"
+      outcome: "NEEDS_INPUT"
+
+  - check_id: "CC-02"
+    description: "Root shapes match expected objects (micro_case.micro_case, etc.)."
+    input_paths:
+      - "$.bundle.micro_case.micro_case"
+      - "$.bundle.trigger_spec.trigger_spec"
+      - "$.bundle.gating_rules.gating_rules"
+      - "$.bundle.outcome_contract.outcome_contract"
+    predicate: "all_present_non_null"
+    on_fail:
+      reason_code: "CFO-03"
+      outcome: "REJECTED"
+
+  - check_id: "CC-03"
+    description: "Trigger IDs are unique."
+    input_paths:
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*].id"
+    predicate: "all_unique"
+    on_fail:
+      reason_code: "CFO-13"
+      outcome: "REJECTED"
+
+  - check_id: "CC-04"
+    description: "Each trigger contains required fields."
+    input_paths:
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*]"
+    predicate: "for_each_has_fields:id,name,formula,threshold,measurement_window,action_if_pass,action_if_fail"
+    on_fail:
+      reason_code: "CFO-04"
+      outcome: "REJECTED"
+
+  - check_id: "CC-05"
+    description: "Gating critical_triggers references exist in trigger_spec."
+    input_paths:
+      - "$.bundle.gating_rules.gating_rules.critical_triggers[*]"
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*].id"
+    predicate: "subset(left,right)"
+    on_fail:
+      reason_code: "CFO-14"
+      outcome: "REJECTED"
+
+  - check_id: "CC-06"
+    description: "signal_states contains exactly PASS, WATCH, FAIL (any order)."
+    input_paths:
+      - "$.bundle.gating_rules.gating_rules.signal_states[*]"
+    predicate: "set_equals:['PASS','WATCH','FAIL']"
+    on_fail:
+      reason_code: "CFO-18"
+      outcome: "REJECTED"
+
+  - check_id: "CC-07"
+    description: "Outcome success_criteria targets are ranges [min,max] (no point targets)."
+    input_paths:
+      - "$.bundle.outcome_contract.outcome_contract.success_criteria.by_month_12[*].target_range"
+      - "$.bundle.outcome_contract.outcome_contract.success_criteria.narrative_integrity[*].target_range"
+    predicate: "for_each_is_two_number_array"
+    on_fail:
+      reason_code: "CFO-08"
+      outcome: "REJECTED"
+
+  - check_id: "CC-08"
+    description: "Breakeven preference is FCF and alternate includes EBITDA."
+    input_paths:
+      - "$.bundle.outcome_contract.outcome_contract.breakeven_definition_selected.preferred"
+      - "$.bundle.outcome_contract.outcome_contract.breakeven_definition_selected.alternate"
+    predicate: "equals(first,'FCF breakeven') AND contains(second,'EBITDA breakeven')"
+    on_fail:
+      reason_code: "CFO-10"
+      outcome: "REJECTED"
+
+  - check_id: "CC-09"
+    description: "Triggers include both T1 (FCF) and T2 (EBITDA)."
+    input_paths:
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*].id"
+    predicate: "contains_all:['T1_FCF_BREAKEVEN_TRAJECTORY','T2_EBITDA_BREAKEVEN_TRAJECTORY']"
+    on_fail:
+      reason_code: "CFO-11"
+      outcome: "REJECTED"
+
+  - check_id: "CC-10"
+    description: "Non-negotiables include the binding 'No fake precision' clause."
+    input_paths:
+      - "$.bundle.micro_case.micro_case.constraints_and_non_negotiables.non_negotiables[*]"
+    predicate: "any_contains:'No fake precision'"
+    on_fail:
+      reason_code: "CFO-09"
+      outcome: "NEEDS_INPUT"

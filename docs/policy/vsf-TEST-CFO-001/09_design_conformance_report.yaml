@@ -1,0 +1,42 @@
+id: vsf-TEST-CFO-001.design_conformance_report
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  subject: "Publication conformance to runtime enforcement contract v1"
+invariants:
+  - "Report does not certify runtime data; it certifies publication structure and reference integrity only."
+  - "Any failed checklist item indicates non-conformance requiring correction."
+hash: "HASH_TODO"
+
+summary:
+  publication_status: "PUBLISHED"
+  conformance_checklist: "07_conformance_checklist.yaml"
+  notes:
+    - "Core artifacts are bundled verbatim under 08_outcome_contract.json -> bundle.*"
+    - "Runtime enforcement contract content is included as provided (verbatim) via docs/enforcement/... and referenced in bundle.runtime_enforcement_contract.content_md"
+
+structural_checks:
+  artifacts_present_expected: ["micro_case", "trigger_spec", "gating_rules", "outcome_contract"]
+  roots_expected:
+    micro_case: "$.bundle.micro_case.micro_case"
+    trigger_spec: "$.bundle.trigger_spec.trigger_spec"
+    gating_rules: "$.bundle.gating_rules.gating_rules"
+    outcome_contract: "$.bundle.outcome_contract.outcome_contract"
+
+reference_integrity:
+  gating_rules_critical_triggers_resolve: true
+  required_trigger_ids_present:
+    - "T1_FCF_BREAKEVEN_TRAJECTORY"
+    - "T2_EBITDA_BREAKEVEN_TRAJECTORY"
+    - "T4_RUNWAY_FLOOR"
+    - "T5_NET_REVENUE_RETENTION_FLOOR"
+    - "T8_GROSS_MARGIN_FLOOR"
+
+known_runtime_dependencies:
+  - "T1/T2 require TargetFCF_3mo_avg(month_index) / TargetEBITDA_3mo_avg(month_index) inputs at runtime."
+  - "T4 requires CashBalance and NetBurn_3mo_avg at runtime; cash_on_hand_usd in micro_case is a range placeholder."
+
+publication_limits:
+  - "Threshold parsing normalization is specified (01_canonicalization_profile.json) but not executed here."
+  - "Hashes are HASH_TODO pending CI computation."
