@@ -28,12 +28,11 @@ jobs:
         run: npm ci
 
       - name: Apply D1 migrations (stage)
+        working-directory: workers/decision-api
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npx wrangler d1 execute "decision_authority_stage" --file workers/decision-api/migrations/0001_init.sql --remote
-          npx wrangler d1 execute "decision_authority_stage" --file workers/decision-api/migrations/0002_admin.sql --remote
+        run: npx wrangler d1 migrations apply decision_authority_stage --remote --env stage
 
       - name: Deploy decision-api (stage)
         working-directory: workers/decision-api
@@ -68,12 +67,11 @@ jobs:
         run: npm ci
 
       - name: Apply D1 migrations (prod)
+        working-directory: workers/decision-api
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npx wrangler d1 execute "decision_authority_prod" --file workers/decision-api/migrations/0001_init.sql --remote
-          npx wrangler d1 execute "decision_authority_prod" --file workers/decision-api/migrations/0002_admin.sql --remote
+        run: npx wrangler d1 migrations apply decision_authority_prod --remote --env prod
 
       - name: Deploy decision-api (prod)
         working-directory: workers/decision-api
