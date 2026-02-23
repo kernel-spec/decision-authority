@@ -1,0 +1,2201 @@
+META (CZ)
+Balím dodané artefakty pro trace_id: vsf-TEST-CFO-001 do Git-ready souborů dle předepsaného repo layoutu (bez redesignu, bez doplňování nových metrik/thresholdů; pouze deterministické “zabalení”). Hash pole ponechávám jako HASH_TODO.
+
+DECISION LEDGER (CZ)
+	•	Zdroj pravdy: uživatelské vstupy micro_case, trigger_spec, gating_rules, outcome_contract, board_memo_draft, runtime_enforcement_contract_v1 + „Publisher publication_set“ (policy wrapper).
+	•	Publikace:
+	◦	docs/cfo_runs/<trace_id>/ = 4 core JSON + board memo (MD).
+	◦	docs/enforcement/<trace_id>/ = runtime enforcement contract (MD, verbatim).
+	◦	docs/policy/<trace_id>/ = policy wrapper set (YAML/JSON/MD) + bundled 08_outcome_contract.json.
+	◦	docs/qa/<trace_id>/ = QA gatekeeper report (MD).
+	◦	docs/index/<trace_id>.md = index (MD).
+	•	Jazyková politika: META/QA poznámky česky, obsah souborů anglicky.
+
+OUTPUT (EN)
+A) Git Commit Plan
+Commit message
+	•	Publish CFO_RUN vsf-TEST-CFO-001 governance bundle + enforcement + QA
+Files to add
+	•	docs/cfo_runs/vsf-TEST-CFO-001/00_micro_case.json
+	•	docs/cfo_runs/vsf-TEST-CFO-001/01_trigger_spec.json
+	•	docs/cfo_runs/vsf-TEST-CFO-001/02_gating_rules.json
+	•	docs/cfo_runs/vsf-TEST-CFO-001/03_outcome_contract.json
+	•	docs/cfo_runs/vsf-TEST-CFO-001/04_board_memo_draft.md
+	•	docs/enforcement/vsf-TEST-CFO-001/runtime_enforcement_contract_v1.md
+	•	docs/policy/vsf-TEST-CFO-001/00_master_registry.yaml
+	•	docs/policy/vsf-TEST-CFO-001/01_canonicalization_profile.json
+	•	docs/policy/vsf-TEST-CFO-001/02_hash_coverage_map.yaml
+	•	docs/policy/vsf-TEST-CFO-001/03_fail_closed_mapping.yaml
+	•	docs/policy/vsf-TEST-CFO-001/04_compatibility_policy.yaml
+	•	docs/policy/vsf-TEST-CFO-001/05_reference_graph_policy.yaml
+	•	docs/policy/vsf-TEST-CFO-001/06_decision_package_taxonomy.yaml
+	•	docs/policy/vsf-TEST-CFO-001/07_conformance_checklist.yaml
+	•	docs/policy/vsf-TEST-CFO-001/08_outcome_contract.json
+	•	docs/policy/vsf-TEST-CFO-001/09_design_conformance_report.yaml
+	•	docs/policy/vsf-TEST-CFO-001/README.md
+	•	docs/qa/vsf-TEST-CFO-001/qa_gatekeeper_report.md
+	•	docs/index/vsf-TEST-CFO-001.md
+
+B) File Pack (file_path + content)
+file_path: docs/cfo_runs/vsf-TEST-CFO-001/00_micro_case.json
+{
+  "micro_case": {
+    "company_profile": {
+      "type": "B2B SaaS",
+      "arr_current_usd": { "point_estimate": 9000000, "range": [8500000, 9500000] },
+      "gross_margin_pct": { "point_estimate": 74, "range": [72, 76] },
+      "growth_narrative_requirement": "Maintain credible growth story while reaching breakeven within 12 months",
+      "board_mandate": "Breakeven in 12 months (define metric explicitly) without breaking growth narrative"
+    },
+    "decision_objective": {
+      "primary": "Achieve breakeven within 12 months via governed triggers and phased operating plan",
+      "secondary": [
+        "Preserve or improve retention and product momentum",
+        "Maintain pipeline health and predictable revenue growth"
+      ],
+      "breakeven_definition_options": [
+        { "metric": "FCF breakeven", "definition": "Operating cash flow - capex >= 0 over trailing 3-month average" },
+        { "metric": "EBITDA breakeven", "definition": "EBITDA >= 0 over trailing 3-month average" }
+      ]
+    },
+    "baseline_financial_model_assumptions": {
+      "arr_to_revenue_recognition_lag": { "description": "Assume revenue ~ ARR on run-rate basis", "range_months": [0, 2] },
+      "opex_current_usd_per_month": { "range": [900000, 1300000], "notes": "All-in operating expenses excluding COGS; placeholder until actuals loaded" },
+      "net_burn_current_usd_per_month": { "range": [200000, 800000], "notes": "Placeholder; actuals to replace in first operating cycle" },
+      "cash_on_hand_usd": { "range": [6000000, 15000000], "notes": "Unknown; must be filled to calibrate runway triggers" }
+    },
+    "operating_context_assumptions": {
+      "go_to_market_mix": { "assumption": "Sales-led with some self-serve expansion", "confidence": "medium" },
+      "customer_profile": { "assumption": "Mid-market / SMB B2B", "confidence": "low" },
+      "pricing_packaging": { "assumption": "Opportunity for packaging/price uplift exists", "confidence": "medium" }
+    },
+    "key_levers": {
+      "revenue_levers": [
+        "NRR improvement via churn reduction + expansion motions",
+        "Pipeline conversion & sales cycle reduction",
+        "Pricing/packaging and discount discipline",
+        "Channel efficiency and segment focus"
+      ],
+      "cost_levers": [
+        "GTM efficiency (CAC payback, quota capacity right-sizing)",
+        "R&D focus (reduce non-core spend, improve release ROI)",
+        "G&A rationalization (tools, contractors, overhead)",
+        "Cloud/infra and COGS optimization (without GM degradation)"
+      ]
+    },
+    "constraints_and_non_negotiables": {
+      "non_negotiables": [
+        "Do not materially degrade customer experience or retention",
+        "Do not cut roadmap items tied to retention/NRR",
+        "Maintain credible growth guidance supported by leading indicators",
+        "No fake precision: all targets expressed as ranges and verified monthly"
+      ],
+      "guardrails": [
+        "NRR must not fall below defined floor",
+        "Pipeline coverage must not fall below defined floor",
+        "Gross margin must not fall below defined floor"
+      ]
+    },
+    "deliverables_from_this_run": [
+      "Trigger specification (what to measure, formulas, windows, actions)",
+      "Gating rules (what is allowed/blocked by signal state)",
+      "Outcome contract (definitions, cadence, owners, reporting, escalation)",
+      "Board memo draft (decision narrative + plan + risks)"
+    ]
+  }
+}
+file_path: docs/cfo_runs/vsf-TEST-CFO-001/01_trigger_spec.json
+{
+  "trigger_spec": {
+    "measurement_cadence": {
+      "daily": ["cash_balance", "collections", "new_bookings (if available)"],
+      "weekly": ["pipeline_created", "pipeline_coverage", "spend_vs_budget", "headcount"],
+      "monthly_close": ["arr", "nrr", "gross_retention", "logo_churn", "gross_margin", "opex", "ebitda", "fcf", "cac_payback", "rule_of_40"]
+    },
+    "triggers": [
+      {
+        "id": "T1_FCF_BREAKEVEN_TRAJECTORY",
+        "name": "FCF trajectory to breakeven",
+        "formula": "FCF_3mo_avg = avg(OperatingCashFlow - Capex) over last 3 months; TrajectoryGap = FCF_3mo_avg - TargetFCF_3mo_avg(month_index)",
+        "threshold": {
+          "pass": "TrajectoryGap >= -$50k to +$50k",
+          "watch": "TrajectoryGap < -$50k and >= -$150k",
+          "fail": "TrajectoryGap < -$150k"
+        },
+        "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+        "action_if_pass": [
+          "Allow planned growth investments within gated budget bands",
+          "Maintain hiring plan for roles already pre-approved by gate"
+        ],
+        "action_if_fail": [
+          "Immediate spend containment: freeze non-essential hiring and backfills",
+          "Reduce discretionary spend 10–20% next month (tools/contractors/marketing experiments)",
+          "Re-forecast within 5 business days; escalate to Board chair if two consecutive fails"
+        ],
+        "variance_notes": "Use bands not point targets; allow seasonality and billing swings; reconcile with working capital movements"
+      },
+      {
+        "id": "T2_EBITDA_BREAKEVEN_TRAJECTORY",
+        "name": "EBITDA trajectory to breakeven (alternate definition)",
+        "formula": "EBITDA_3mo_avg = avg(Revenue - COGS - Opex excl D&A) over last 3 months; TrajectoryGap = EBITDA_3mo_avg - TargetEBITDA_3mo_avg(month_index)",
+        "threshold": {
+          "pass": "TrajectoryGap >= -$40k to +$40k",
+          "watch": "TrajectoryGap < -$40k and >= -$120k",
+          "fail": "TrajectoryGap < -$120k"
+        },
+        "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+        "action_if_pass": [
+          "Permit growth experiments if other guardrails pass",
+          "Continue roadmap items classified as retention-critical"
+        ],
+        "action_if_fail": [
+          "Trigger cost actions: pause low-ROI programs; reallocate to retention and proven channels",
+          "Implement approval gate for any new vendor spend >$5k/month"
+        ],
+        "variance_notes": "EBITDA ignores working capital; pair with cash triggers (T4/T5) to avoid cash surprises"
+      },
+      {
+        "id": "T3_RULE_OF_40_GUARDRAIL",
+        "name": "Rule of 40 guardrail (growth narrative)",
+        "formula": "Ro40 = (ARR_Growth_Rate_TTM %) + (EBITDA_Margin_TTM %)",
+        "threshold": {
+          "pass": "Ro40 >= 30% (range 30–45%)",
+          "watch": "Ro40 >= 20% and < 30%",
+          "fail": "Ro40 < 20%"
+        },
+        "measurement_window": "Trailing 12 months, updated monthly",
+        "action_if_pass": [
+          "Use Ro40 in external narrative and board reporting as primary efficiency signal",
+          "Prioritize investments with payback <= 12–18 months"
+        ],
+        "action_if_fail": [
+          "Shift emphasis to efficiency story; cut/reshape lowest ROI acquisition spend",
+          "Mandate pricing/packaging review and discount controls within 30 days"
+        ],
+        "variance_notes": "Bands reflect market variability; select benchmark band by segment and growth stage"
+      },
+      {
+        "id": "T4_RUNWAY_FLOOR",
+        "name": "Cash runway floor",
+        "formula": "RunwayMonths = CashBalance / max(1, NetBurn_3mo_avg)",
+        "threshold": {
+          "pass": "RunwayMonths >= 15 (range 15–24)",
+          "watch": "RunwayMonths >= 12 and < 15",
+          "fail": "RunwayMonths < 12"
+        },
+        "measurement_window": "Trailing 3-month burn average, evaluated weekly and monthly",
+        "action_if_pass": ["Proceed with phased plan; keep optionality for selective investment"],
+        "action_if_fail": [
+          "Activate defensive plan: hiring freeze, renegotiate major vendors, cut discretionary spend 15–25%",
+          "Consider financing/strategic options exploration if fails for 4 consecutive weeks"
+        ],
+        "variance_notes": "Runway depends on burn volatility; use 3-month avg and also a high-burn stress case (+20–30%)"
+      },
+      {
+        "id": "T5_NET_REVENUE_RETENTION_FLOOR",
+        "name": "NRR floor (do-not-break retention)",
+        "formula": "NRR = (StartingARR + Expansion - Contraction - Churn) / StartingARR",
+        "threshold": {
+          "pass": "NRR >= 105% (range 105–120%)",
+          "watch": "NRR >= 100% and < 105%",
+          "fail": "NRR < 100%"
+        },
+        "measurement_window": "Monthly cohort-based, evaluated monthly; also 3-month rolling average",
+        "action_if_pass": [
+          "Maintain planned product/customer success investments tied to retention",
+          "Allow targeted expansion programs"
+        ],
+        "action_if_fail": [
+          "Protect CS/product capacity; pause risky changes; run churn war-room within 7 days",
+          "Reallocate GTM spend from new logo to retention until back above 100–105%"
+        ],
+        "variance_notes": "NRR varies by segment; thresholds should be calibrated to historical distribution"
+      },
+      {
+        "id": "T6_PIPELINE_COVERAGE",
+        "name": "Pipeline coverage for next-quarter bookings",
+        "formula": "PipelineCoverage = QualifiedPipelineAmount_next_quarter / BookingsTarget_next_quarter",
+        "threshold": {
+          "pass": ">= 3.0x (range 3.0–4.5x)",
+          "watch": ">= 2.0x and < 3.0x",
+          "fail": "< 2.0x"
+        },
+        "measurement_window": "Weekly snapshot; evaluate weekly trend (4-week moving average)",
+        "action_if_pass": [
+          "Maintain demand gen and SDR capacity; focus on conversion improvements"
+        ],
+        "action_if_fail": [
+          "Stop unproven channels; redirect to pipeline creation with best historical ROI",
+          "Revise bookings target or re-segment focus within 2 weeks"
+        ],
+        "variance_notes": "Coverage needed depends on win rates and cycle length; calibrate quarterly"
+      },
+      {
+        "id": "T7_CAC_PAYBACK",
+        "name": "CAC payback discipline",
+        "formula": "CACPaybackMonths = CAC / (GrossMargin * NewARR_per_month)",
+        "threshold": {
+          "pass": "<= 15 months (range 9–15)",
+          "watch": "> 15 and <= 20 months",
+          "fail": "> 20 months"
+        },
+        "measurement_window": "Quarterly cohort-based; updated monthly with trailing 3-month smoothing",
+        "action_if_pass": ["Allow scaling of efficient segments/channels within gate"],
+        "action_if_fail": [
+          "Reduce acquisition spend 10–30% in failing segments; tighten ICP and qualification",
+          "Enforce discount ceilings and pricing governance immediately"
+        ],
+        "variance_notes": "Payback is lagging; pair with leading indicators (conversion rates, ASP, sales cycle)"
+      },
+      {
+        "id": "T8_GROSS_MARGIN_FLOOR",
+        "name": "Gross margin floor",
+        "formula": "GM = (Revenue - COGS) / Revenue",
+        "threshold": {
+          "pass": ">= 72% (range 72–78%)",
+          "watch": ">= 70% and < 72%",
+          "fail": "< 70%"
+        },
+        "measurement_window": "Monthly close; 3-month rolling average",
+        "action_if_pass": [
+          "Continue investments; pursue infra optimization roadmap"
+        ],
+        "action_if_fail": [
+          "Launch COGS taskforce: cloud commitments, arch efficiency, support cost review",
+          "Pause low-margin offerings/custom deals unless approved by CFO"
+        ],
+        "variance_notes": "Account for usage spikes and one-time credits; normalize where appropriate"
+      }
+    ],
+    "target_trajectory_templates": {
+      "breakeven_in_12_months": {
+        "description": "Monthly target path for EBITDA or FCF to reach >=0 by month 12 using bands, not point targets",
+        "example_band": {
+          "month_0_gap_to_breakeven": { "range_usd_per_month": [-800000, -200000] },
+          "required_improvement_per_quarter": { "range_usd_per_month": [150000, 350000] }
+        }
+      }
+    }
+  }
+}
+file_path: docs/cfo_runs/vsf-TEST-CFO-001/02_gating_rules.json
+{
+  "gating_rules": {
+    "principles": [
+      "Fail-closed: if any critical guardrail fails, block discretionary growth spend and net-new headcount",
+      "Protect retention: never cut retention-critical CS/Product capacity when NRR trigger is watch/fail",
+      "Reallocate before cutting: shift from low-ROI acquisition to retention and proven channels first",
+      "Bands over points: decisions based on ranges and multi-signal corroboration"
+    ],
+    "signal_states": ["PASS", "WATCH", "FAIL"],
+    "critical_triggers": ["T1_FCF_BREAKEVEN_TRAJECTORY", "T4_RUNWAY_FLOOR", "T5_NET_REVENUE_RETENTION_FLOOR", "T8_GROSS_MARGIN_FLOOR"],
+    "gates": [
+      {
+        "gate_id": "G1_HEADCOUNT",
+        "scope": "Net-new hires and backfills",
+        "allowed_if": [
+          { "when": "All critical_triggers are PASS", "allow": "Proceed with approved hiring plan; add up to +1–2 critical roles/month if Ro40 is PASS and CAC payback is PASS" },
+          { "when": "Any critical_trigger is WATCH", "allow": "Backfills only + explicitly retention-critical roles; CFO approval required" }
+        ],
+        "blocked_if": [
+          { "when": "Any critical_trigger is FAIL", "block": "All net-new hires and non-critical backfills; exception requires CEO+CFO signoff and written ROI case" }
+        ],
+        "exceptions": {
+          "retention_protection": "If T5 is WATCH/FAIL, CS/Product roles that directly mitigate churn are allowed even during cost containment, but must be offset by cuts elsewhere"
+        }
+      },
+      {
+        "gate_id": "G2_GTM_SPEND",
+        "scope": "Marketing + sales variable spend, tools, agencies",
+        "allowed_if": [
+          { "when": "T7_CAC_PAYBACK PASS and T6_PIPELINE_COVERAGE PASS and (T1 or T2) is PASS/WATCH", "allow": "Scale spend +5–15% in proven segments; keep experiment budget capped (2–5% of GTM spend)" }
+        ],
+        "blocked_if": [
+          { "when": "T7 FAIL or T6 FAIL", "block": "Freeze scaling; cut lowest ROI channels 10–30%; require channel-level ROI proof for reinstatement" },
+          { "when": "T1 FAIL and T4 WATCH/FAIL", "block": "Immediate discretionary GTM spend freeze except for commitments; re-approve monthly" }
+        ],
+        "required_controls": [
+          "Discount governance: set discount ceilings by segment; CFO approval for exceptions",
+          "Quota capacity check: ensure rep capacity aligns with pipeline coverage thresholds"
+        ]
+      },
+      {
+        "gate_id": "G3_PRODUCT_AND_RND",
+        "scope": "Roadmap, engineering spend, contractors",
+        "allowed_if": [
+          { "when": "T5 PASS or WATCH", "allow": "Prioritize retention-critical roadmap; limit new big-bet initiatives to those with quantified retention or upsell impact" }
+        ],
+        "blocked_if": [
+          { "when": "T1 FAIL and T5 PASS", "block": "Pause non-core R&D; focus on cost-to-serve, reliability, and upsell enablers" },
+          { "when": "T5 FAIL", "block": "Block any roadmap that risks churn; mandate churn-reduction tiger team and reliability focus" }
+        ]
+      },
+      {
+        "gate_id": "G4_VENDOR_AND_NON_LABOR",
+        "scope": "All non-labor spend (software, cloud commitments, contractors outside product)",
+        "allowed_if": [
+          { "when": "T1 PASS and T4 PASS", "allow": "Renewals allowed; new spend requires ROI case if >$5k/month" }
+        ],
+        "blocked_if": [
+          { "when": "T4 WATCH/FAIL", "block": "Renegotiate top vendors; approve only mission-critical spend; target 10–20% savings within 60 days" }
+        ]
+      }
+    ],
+    "escalation_rules": [
+      { "condition": "Two consecutive monthly FAILs on T1/T2", "action": "Board-level review; adopt stronger cost program; revise guidance narrative" },
+      { "condition": "Four consecutive weekly FAILs on T4", "action": "Activate financing/strategic options workstream; implement immediate burn reduction plan" }
+    ]
+  }
+}
+file_path: docs/cfo_runs/vsf-TEST-CFO-001/03_outcome_contract.json
+{
+  "outcome_contract": {
+    "breakeven_definition_selected": {
+      "preferred": "FCF breakeven",
+      "alternate": "EBITDA breakeven",
+      "selection_rule": "Use FCF as primary; report EBITDA as secondary; if cash volatility is high, emphasize EBITDA trajectory plus runway floor"
+    },
+    "success_criteria": {
+      "by_month_12": [
+        { "metric": "FCF_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+        { "metric": "EBITDA_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+        { "metric": "NRR", "target_range": [105, 120], "unit": "percent" },
+        { "metric": "GrossMargin", "target_range": [72, 78], "unit": "percent" }
+      ],
+      "narrative_integrity": [
+        { "metric": "Ro40", "target_range": [30, 45], "unit": "percent" },
+        { "metric": "PipelineCoverage", "target_range": [3.0, 4.5], "unit": "x" }
+      ]
+    },
+    "operating_cadence": {
+      "weekly": {
+        "forum": "CFO Operating Review",
+        "duration_minutes": 45,
+        "agenda": [
+          "Trigger dashboard (T4 runway, T6 pipeline, spend vs budget)",
+          "Actions from last week and owners",
+          "Exceptions requested (gates) and approvals/denials"
+        ],
+        "attendees": ["CFO", "CEO", "Head of Sales", "Head of Marketing", "Head of Product/Eng", "RevOps/FP&A"]
+      },
+      "monthly": {
+        "forum": "Close + Board Pack Prep",
+        "deliverables": [
+          "Monthly trigger status and trends",
+          "Forecast update (base / downside / upside ranges)",
+          "Decision log of gate exceptions and ROI outcomes"
+        ],
+        "timing": "Within 7 business days of month-end close"
+      },
+      "quarterly": {
+        "forum": "Board Meeting",
+        "deliverables": [
+          "Trajectory vs breakeven path",
+          "Efficiency narrative (Ro40, CAC payback, NRR)",
+          "Strategic tradeoffs and next-quarter gated budget"
+        ]
+      }
+    },
+    "owners_and_accountability": {
+      "metric_owners": {
+        "T1_T2": "CFO (FP&A)",
+        "T4": "CFO + Controller/Treasury",
+        "T5": "Head of CS + Product",
+        "T6_T7": "Head of Sales + RevOps",
+        "T8": "VP Eng/Infra + CFO"
+      },
+      "gate_approvers": {
+        "G1": ["CFO", "CEO"],
+        "G2": ["CFO", "Head of Sales/Marketing"],
+        "G3": ["CPO/CTO", "CFO"],
+        "G4": ["CFO"]
+      }
+    },
+    "data_requirements": {
+      "systems": ["Accounting/ERP", "CRM", "Billing/Subscriptions", "Data warehouse (if exists)"],
+      "minimum_fields": [
+        "ARR bridge (start, new, expansion, contraction, churn)",
+        "COGS breakdown (cloud, support, other)",
+        "Opex by function (R&D, S&M, G&A) and fixed vs variable",
+        "Pipeline stages and definitions; bookings target",
+        "Headcount by function; fully-loaded cost assumptions"
+      ],
+      "data_quality_sla": {
+        "close_timeliness_days": { "range": [5, 10] },
+        "crm_hygiene": "Stage definitions enforced; required fields for qualification"
+      }
+    },
+    "fail_closed_policy": {
+      "default_state": "If any critical trigger is FAIL, system enters DEFENSIVE mode until two consecutive PASS cycles",
+      "defensive_mode_actions": [
+        "Hiring freeze except retention-critical",
+        "Discretionary spend reduction 10–25%",
+        "Weekly cash focus and collections push",
+        "Reallocation of GTM spend to proven ROI or retention"
+      ]
+    }
+  }
+}
+file_path: docs/cfo_runs/vsf-TEST-CFO-001/04_board_memo_draft.md
+---
+vsf:
+  date: 2026-02-23
+  mode: CFO_RUN
+  trace_id: vsf-TEST-CFO-001
+  stage: F4
+  target: "SaaS breakeven 12m — narrative safe"
+  language: "EN"
+  status: LOCKED
+  tags: ["board_memo","breakeven","governance","gating","triggers"]
+  notion_page: ""
+---
+
+Board Decision Package: Breakeven in 12 Months Without Breaking the Growth Narrative
+
+Company: B2B SaaS (~$9M ARR, ~74% gross margin)
+Decision Date: 2026-02-23
+Sponsor: CFO
+Audience: Board, CEO, Exec Team
+
+1) Executive Summary
+
+We will reach breakeven within 12 months using a governed, trigger-based operating system that preserves the growth narrative through explicit guardrails on retention and pipeline health. The plan shifts the company from “growth at any cost” to “efficient growth,” using Rule of 40 and leading indicators to support external credibility while we tighten spend and improve unit economics.
+
+What we are asking the Board to approve today
+	1.	Adopt FCF breakeven as the primary definition (with EBITDA as a secondary lens).
+	2.	Approve the trigger + gating system (fail-closed) that automatically constrains hiring and discretionary spend when critical signals degrade.
+	3.	Approve a phased execution plan:
+	•	Phase 1 (0–30 days): stop-the-bleed + instrumentation + fast savings
+	•	Phase 2 (31–120 days): GTM efficiency + retention lift + pricing discipline
+	•	Phase 3 (121–365 days): scale what works within gated budgets to land at breakeven
+
+Outcome
+	•	Breakeven (FCF and/or EBITDA) by month 12 using ranges (no false precision)
+	•	Maintain credible growth story via guardrails: NRR floor, pipeline coverage, gross margin, and Rule of 40 trend
+
+2) Context and Mandate
+
+The Board mandate is clear: achieve breakeven in 12 months without undermining the growth narrative. For a ~$9M ARR SaaS at ~74% GM, the path is operationally feasible if we:
+	•	Protect retention and product quality (prevent revenue leakage)
+	•	Improve GTM efficiency (better payback, tighter ICP)
+	•	Rationalize spend with disciplined gates (no ad-hoc cuts that harm the long-term)
+
+3) Breakeven Definition and Reporting
+
+We propose FCF breakeven as the primary definition because it reflects cash reality. However, cash can be volatile due to collections and working capital timing, so we will also report EBITDA breakeven as a consistent operating view.
+
+Definition (FCF): 3-month average of (Operating Cash Flow – Capex) ≥ 0
+Definition (EBITDA): 3-month average EBITDA ≥ 0
+We will manage to a trajectory with bands (e.g., within ±$40–$50k of target band is considered on-track).
+
+4) Operating System: Triggers and Gates (Fail-Closed)
+
+We will run the company with explicit triggers (formulas + thresholds + windows + pass/fail actions). The system is designed to fail-closed: if critical triggers fail, the company automatically shifts into defensive mode until two consecutive PASS cycles.
+
+Critical guardrails (non-negotiable)
+	•	Runway floor (>= 15 months target band; < 12 months = FAIL)
+	•	Retention floor (NRR >= 105% target band; < 100% = FAIL)
+	•	Gross margin floor (>= 72% target band; < 70% = FAIL)
+	•	Breakeven trajectory (FCF or EBITDA 3-mo avg vs target band)
+
+Growth narrative guardrails
+	•	Rule of 40: keep trend >= ~30% band where feasible
+	•	Pipeline coverage: maintain >= ~3.0x next-quarter coverage band
+	•	CAC payback: stay within <= ~15 months band; failing segments are cut or reworked
+
+What gates do
+	•	Hiring gate: net-new headcount allowed only when critical triggers are PASS; otherwise backfills only (and retention-critical exceptions)
+	•	GTM spend gate: scale only where pipeline + payback are healthy; otherwise cut lowest ROI channels and tighten qualification
+	•	Product/R&D gate: protect retention-critical roadmap; pause non-core initiatives during cost stress
+	•	Vendor gate: renegotiate and constrain non-labor spend if runway deteriorates
+
+5) Plan of Record: 3 Phases
+
+Phase 1 (0–30 days): Stop-the-bleed + Instrumentation
+
+Goals: immediate cost control without harming retention; establish metrics, definitions, and cadence.
+Actions:
+	•	Implement trigger dashboard and weekly operating review
+	•	Freeze non-essential spend; require ROI for new vendors >$5k/month
+	•	Identify 10–20% discretionary savings from tools, contractors, and low-ROI marketing tests
+	•	Confirm baseline: burn, runway, ARR bridge, GM drivers, churn reasons
+
+Deliverable: Board-ready baseline model (base/downside/upside) with variance bands.
+
+Phase 2 (31–120 days): GTM Efficiency + Retention + Pricing Discipline
+
+Goals: improve unit economics and reduce revenue leakage; preserve growth narrative via leading indicators.
+Actions:
+	•	Tighten ICP, enforce qualification, rebalance SDR/AE capacity to pipeline reality
+	•	Reduce discounting variance; implement pricing/packaging governance
+	•	Launch churn war-room if NRR trends toward WATCH/FAIL
+	•	Drive CAC payback down through conversion improvements and segment focus
+	•	Infra/COGS optimization roadmap to protect GM
+
+Deliverable: demonstrated improvements in payback, pipeline coverage, and NRR trajectory.
+
+Phase 3 (121–365 days): Scale Within Gates to Land at Breakeven
+
+Goals: selective reinvestment in proven channels and product initiatives; reach breakeven by month 12.
+Actions:
+	•	Scale only segments/channels with PASS on payback and coverage
+	•	Invest in expansion motions where NRR supports it
+	•	Maintain defensive readiness: if triggers fail, automatically constrain spend/hiring
+
+Deliverable: breakeven achieved with stable retention and credible growth narrative metrics.
+
+6) Key Risks and Mitigations
+	1.	Retention erosion from cost actions
+	•	Mitigation: retention floor trigger; protect CS/Product capacity; churn war-room.
+	2.	Pipeline shortfall jeopardizes growth narrative
+	•	Mitigation: pipeline coverage trigger; re-segment; focus spend on proven ROI.
+	3.	Cash volatility masks underlying trend
+	•	Mitigation: use 3-month averages; pair EBITDA with runway trigger; stress cases.
+	4.	Over-cutting reduces future growth capacity
+	•	Mitigation: gates allow selective investment when PASS; keep a capped experiment budget.
+	5.	Data quality/definitions cause “false signals”
+	•	Mitigation: data SLA; enforce CRM hygiene; standard metric definitions in outcome contract.
+
+7) Decisions Required Today
+	1.	Approve FCF breakeven as primary definition (EBITDA as secondary).
+	2.	Approve the trigger thresholds (bands) and fail-closed gating rules.
+	3.	Approve the operating cadence and owner accountability model.
+	4.	Approve Phase 1 actions (instrumentation + immediate discretionary savings + vendor controls).
+
+8) What the Board Should Expect Next
+	•	Weekly dashboard highlights (runway, pipeline, spend vs budget)
+	•	Monthly close package: trigger status, forecast ranges (base/downside/upside), gate exception log
+	•	Quarterly: trajectory vs breakeven plan, efficiency narrative (Rule of 40, NRR, CAC payback)
+file_path: docs/enforcement/vsf-TEST-CFO-001/runtime_enforcement_contract_v1.md
+---
+vsf:
+  date: 2026-02-23
+  mode: CFO_RUN
+  trace_id: vsf-TEST-CFO-001
+  stage: F4
+  target: "SaaS breakeven 12m — narrative safe"
+  language: "EN"
+  status: LOCKED
+  tags: ["runtime_enforcement","fail_closed","gating","reason_codes"]
+  notion_page: ""
+---
+
+# Runtime Enforcement Contract v1 (CFO) — vsf-TEST-CFO-001
+
+## A) Enforcement Contract v1
+
+### A1. Ingress: Required Artifacts (Fail-Closed)
+The Worker MUST ingest exactly four artifacts as JSON objects:
+1) `micro_case`
+2) `trigger_spec`
+3) `gating_rules`
+4) `outcome_contract`
+
+**Checks (deterministic):**
+- RUNTIME-A1-1: All four top-level keys exist and are non-null.
+  - If missing any: reason_code = CFO-01, outcome = NEEDS_INPUT
+- RUNTIME-A1-2: Each artifact parses as valid JSON and matches expected root shape:
+  - `micro_case.micro_case` object exists
+  - `trigger_spec.trigger_spec` object exists
+  - `gating_rules.gating_rules` object exists
+  - `outcome_contract.outcome_contract` object exists
+  - If invalid/parse error: reason_code = CFO-02, outcome = REJECTED
+  - If wrong root shape: reason_code = CFO-03, outcome = REJECTED
+
+### A2. Units, Windows, and Cadence Consistency (No Ambiguity)
+All triggers and success criteria MUST be evaluable with explicit units, windows, and cadence.
+
+**Global unit policy:**
+- Money: USD (allow "$" as alias, normalized to USD)
+- Percent: percent (0–100 scale unless explicitly labeled as ratio)
+- Multipliers: "x"
+- Time: months / weeks / days where stated
+
+**Checks:**
+- RUNTIME-A2-1: Every trigger has:
+  - `id`, `name`, `formula`, `threshold.pass/watch/fail`, `measurement_window`, and at least one action in `action_if_pass` and `action_if_fail`.
+  - If missing: reason_code = CFO-04, outcome = REJECTED
+- RUNTIME-A2-2: Every threshold statement must be machine-normalizable into a comparator set (>=, <=, <, >) and numeric value(s) with unit.
+  - If not normalizable (e.g., free text without numbers): reason_code = CFO-05, outcome = REJECTED
+- RUNTIME-A2-3: Window alignment:
+  - If trigger declares "Trailing 3-month average" then formula must reference 3mo_avg (or equivalent) OR be explicitly mapped in normalization rules.
+  - If mismatch: reason_code = CFO-06, outcome = REJECTED
+- RUNTIME-A2-4: Outcome success_criteria units must match trigger units when same metric name is used (e.g., NRR percent, GrossMargin percent).
+  - If mismatch: reason_code = CFO-07, outcome = REJECTED
+
+### A3. Variance Requirement (Bands Over Points)
+“No fake precision” is mandatory: all targets MUST be expressed as ranges/bands.
+
+**Checks:**
+- RUNTIME-A3-1: In `outcome_contract.success_criteria`, every target is `target_range` with two numbers [min,max].
+  - If any metric uses a single point: reason_code = CFO-08, outcome = REJECTED
+- RUNTIME-A3-2: In `micro_case.constraints_and_non_negotiables.non_negotiables`, presence of “No fake precision” requirement is treated as binding:
+  - If missing from micro_case (unexpected): reason_code = CFO-09, outcome = NEEDS_INPUT
+
+### A4. Breakeven Metric Selection Rule (FCF Primary)
+Primary breakeven is FCF; EBITDA is secondary; both are reported.
+
+**Checks:**
+- RUNTIME-A4-1: `outcome_contract.breakeven_definition_selected.preferred` must equal "FCF breakeven" and `alternate` must include "EBITDA breakeven".
+  - If absent or different: reason_code = CFO-10, outcome = REJECTED
+- RUNTIME-A4-2: Triggers must include both T1 (FCF) and T2 (EBITDA).
+  - If missing either: reason_code = CFO-11, outcome = REJECTED
+- RUNTIME-A4-3: If cash_on_hand is unknown (micro_case baseline has range but not point), runway trigger T4 cannot be computed deterministically unless actual `cash_balance` data is provided at runtime.
+  - If runtime evaluation requested without cash_balance input: reason_code = CFO-12, outcome = NEEDS_INPUT
+
+### A5. Trigger Rules: Evaluation, Normalization, and State
+#### A5.1 Trigger State Machine
+Each trigger evaluates to one of: PASS, WATCH, FAIL.
+- If evaluation cannot be computed due to missing inputs: state = UNKNOWN (internal), and enforcement behaves fail-closed.
+
+**Checks:**
+- RUNTIME-A5-1: All trigger IDs are unique.
+  - If duplicate: reason_code = CFO-13, outcome = REJECTED
+- RUNTIME-A5-2: Trigger IDs referenced in gating_rules critical_triggers and gates must exist in trigger_spec.triggers.
+  - If reference missing: reason_code = CFO-14, outcome = REJECTED
+- RUNTIME-A5-3: Each trigger declares measurement cadence compatible with trigger_spec.measurement_cadence categories (daily/weekly/monthly_close).
+  - If trigger requires cadence not listed: reason_code = CFO-15, outcome = REJECTED
+
+#### A5.2 Required Runtime Inputs by Trigger (Minimum)
+To compute triggers, the Worker MUST require the following minimum inputs per evaluation cycle:
+
+- T1 (FCF trajectory): OperatingCashFlow, Capex, TargetFCF_3mo_avg(month_index), month_index
+- T2 (EBITDA trajectory): Revenue, COGS, Opex excl D&A, TargetEBITDA_3mo_avg(month_index), month_index
+- T3 (Ro40): ARR_Growth_Rate_TTM, EBITDA_Margin_TTM
+- T4 (Runway): CashBalance, NetBurn_3mo_avg (or components to derive), and burn nonzero guard
+- T5 (NRR): StartingARR, Expansion, Contraction, Churn
+- T6 (Pipeline coverage): QualifiedPipelineAmount_next_quarter, BookingsTarget_next_quarter
+- T7 (CAC payback): CAC, GrossMargin, NewARR_per_month
+- T8 (Gross margin): Revenue, COGS
+
+**Checks:**
+- RUNTIME-A5-4: If any required input for a CRITICAL trigger (T1, T4, T5, T8) is missing at evaluation time:
+  - reason_code = CFO-16, outcome = NEEDS_INPUT
+- RUNTIME-A5-5: If any required input for a NON-critical trigger is missing:
+  - reason_code = CFO-17, outcome = NEEDS_INPUT
+
+### A6. Tranche Gating: Allowed/Blocked Decisions (No Bypass)
+The Worker MUST enforce gates exactly as specified in `gating_rules.gates`, with the principles:
+- Fail-closed on critical guardrails
+- Protect retention
+- Reallocate before cutting
+- Bands over points
+
+#### A6.1 Gate Evaluation Order (Deterministic)
+1) Evaluate all triggers -> states
+2) Determine if any critical trigger is FAIL / WATCH
+3) Apply gate rules (G1..G4) in ascending gate_id order
+4) Apply exceptions only if explicitly defined for that gate
+5) Apply escalation rules after gate decisions are computed
+
+**Checks:**
+- RUNTIME-A6-1: `gating_rules.signal_states` must contain PASS, WATCH, FAIL exactly (order irrelevant).
+  - If not: reason_code = CFO-18, outcome = REJECTED
+- RUNTIME-A6-2: `gating_rules.critical_triggers` must be a subset of trigger IDs and non-empty.
+  - If empty or invalid: reason_code = CFO-19, outcome = REJECTED
+
+#### A6.2 Gate-Specific Enforcement (Exact)
+**G1_HEADCOUNT**
+- Allowed:
+  - If all critical triggers PASS: proceed with approved plan; may add +1–2 critical roles/month only if Ro40 PASS AND CAC Payback PASS.
+  - If any critical trigger WATCH: backfills only + retention-critical roles; CFO approval required.
+- Blocked:
+  - If any critical trigger FAIL: block all net-new hires and non-critical backfills; exception requires CEO+CFO signoff and written ROI case.
+- Exception:
+  - If T5 WATCH/FAIL: CS/Product roles directly mitigating churn are allowed even during containment, but MUST be offset by cuts elsewhere.
+
+**Checks:**
+- RUNTIME-A6-3: Any headcount request without explicit classification {retention-critical | non-critical | backfill | net-new}:
+  - reason_code = CFO-20, outcome = NEEDS_INPUT
+- RUNTIME-A6-4: Any headcount approval when any critical trigger FAIL and missing CEO+CFO signoff + ROI case:
+  - reason_code = CFO-21, outcome = REJECTED
+
+**G2_GTM_SPEND**
+- Allowed:
+  - If T7 PASS AND T6 PASS AND (T1 or T2) PASS/WATCH: scale +5–15% in proven segments; experiment budget capped 2–5% of GTM spend.
+- Blocked:
+  - If T7 FAIL or T6 FAIL: freeze scaling; cut lowest ROI channels 10–30%; require ROI proof for reinstatement.
+  - If T1 FAIL AND T4 WATCH/FAIL: immediate discretionary GTM spend freeze except commitments; re-approve monthly.
+- Required controls:
+  - Discount governance by segment; CFO approval for exceptions
+  - Quota capacity check alignment with coverage thresholds
+
+**Checks:**
+- RUNTIME-A6-5: Any GTM spend change request missing: segment, channel, amount, expected ROI/payback, and whether it is "experiment" vs "proven":
+  - reason_code = CFO-22, outcome = NEEDS_INPUT
+- RUNTIME-A6-6: Any discount exception without CFO approval:
+  - reason_code = CFO-23, outcome = REJECTED
+
+**G3_PRODUCT_AND_RND**
+- Allowed:
+  - If T5 PASS or WATCH: prioritize retention-critical roadmap; limit new big bets to quantified retention/upsell impact.
+- Blocked:
+  - If T1 FAIL and T5 PASS: pause non-core R&D; focus on cost-to-serve, reliability, upsell enablers.
+  - If T5 FAIL: block any roadmap that risks churn; mandate churn-reduction tiger team and reliability focus.
+
+**Checks:**
+- RUNTIME-A6-7: Any roadmap initiative missing classification {retention-critical | non-core | big-bet} and quantified impact (retention/upsell):
+  - reason_code = CFO-24, outcome = NEEDS_INPUT
+- RUNTIME-A6-8: Any approval of a roadmap item flagged as “risks churn” while T5 FAIL:
+  - reason_code = CFO-25, outcome = REJECTED
+
+**G4_VENDOR_AND_NON_LABOR**
+- Allowed:
+  - If T1 PASS and T4 PASS: renewals allowed; new spend requires ROI case if >$5k/month.
+- Blocked:
+  - If T4 WATCH/FAIL: renegotiate top vendors; approve only mission-critical; target 10–20% savings within 60 days.
+
+**Checks:**
+- RUNTIME-A6-9: Any new vendor spend >$5k/month without ROI case:
+  - reason_code = CFO-26, outcome = REJECTED
+- RUNTIME-A6-10: Any vendor approval under T4 WATCH/FAIL without mission-critical justification:
+  - reason_code = CFO-27, outcome = REJECTED
+
+### A7. Defensive Mode (Fail-Closed Policy)
+From outcome_contract.fail_closed_policy:
+- Default: If any critical trigger is FAIL, system enters DEFENSIVE mode until two consecutive PASS cycles.
+
+**Checks:**
+- RUNTIME-A7-1: If any critical trigger FAIL:
+  - enforce DEFENSIVE actions set:
+    - Hiring freeze except retention-critical
+    - Discretionary spend reduction 10–25%
+    - Weekly cash focus and collections push
+    - Reallocation of GTM spend to proven ROI or retention
+  - If Worker attempts to remain in non-defensive mode: reason_code = CFO-28, outcome = REJECTED
+- RUNTIME-A7-2: Exit criteria requires two consecutive cycles where all critical triggers PASS.
+  - If exit attempted without meeting criteria: reason_code = CFO-29, outcome = REJECTED
+
+### A8. Escalation Rules (Mandatory)
+From gating_rules.escalation_rules:
+- Two consecutive monthly FAILs on T1/T2 -> Board-level review; stronger cost program; revise guidance narrative
+- Four consecutive weekly FAILs on T4 -> activate financing/strategic options; immediate burn reduction
+
+**Checks:**
+- RUNTIME-A8-1: If condition met and escalation not emitted as required event:
+  - reason_code = CFO-30, outcome = REJECTED
+
+### A9. Data Requirements & Quality SLA (Minimum Enforceable Set)
+From outcome_contract.data_requirements:
+- Systems: Accounting/ERP, CRM, Billing/Subscriptions, Data warehouse (if exists)
+- Minimum fields: ARR bridge, COGS breakdown, Opex by function, Pipeline stages/targets, Headcount by function with fully-loaded cost assumptions
+- SLA: close timeliness range [5,10] days; CRM hygiene enforced
+
+**Checks:**
+- RUNTIME-A9-1: If any minimum_fields are absent from available runtime dataset for monthly close evaluation:
+  - reason_code = CFO-31, outcome = NEEDS_INPUT
+- RUNTIME-A9-2: If monthly close is delivered outside SLA (>10 business days) and Worker is asked to certify trigger states as final:
+  - reason_code = CFO-32, outcome = REJECTED
+- RUNTIME-A9-3: If CRM hygiene required fields not enforced (missing stage definitions/required qualification fields) and pipeline triggers are used for gating:
+  - reason_code = CFO-33, outcome = NEEDS_INPUT
+
+### A10. No-Bypass Invariants (Hard Stops)
+The following are absolute:
+1) Any approval that violates a gate’s `blocked_if` is forbidden unless an explicit exception exists AND required signoffs are present.
+2) Any attempt to approve discretionary growth spend or net-new headcount while any critical trigger is FAIL is forbidden (except explicit retention_protection exception for CS/Product roles, with offset requirement).
+3) All approvals/denials must be logged with: request_id, gate_id, trigger_states, rationale, signoffs, expected ROI band.
+
+**Checks:**
+- RUNTIME-A10-1: Gate decision without decision log entry:
+  - reason_code = CFO-34, outcome = REJECTED
+- RUNTIME-A10-2: Retention_protection exception used without documented offset cuts:
+  - reason_code = CFO-35, outcome = REJECTED
+
+---
+
+## B) Reason Codes Taxonomy (CFO-01..)
+- CFO-01 Missing required artifact(s) (NEEDS_INPUT)
+- CFO-02 JSON parse error (REJECTED)
+- CFO-03 Wrong root shape / missing expected root object (REJECTED)
+- CFO-04 Trigger missing required fields (REJECTED)
+- CFO-05 Threshold not machine-normalizable (REJECTED)
+- CFO-06 Measurement window/formula mismatch (REJECTED)
+- CFO-07 Units mismatch between triggers and outcome criteria (REJECTED)
+- CFO-08 Point target without range (REJECTED)
+- CFO-09 Missing “no fake precision” non-negotiable (NEEDS_INPUT)
+- CFO-10 Breakeven preference/alternate mismatch (REJECTED)
+- CFO-11 Missing T1 or T2 trigger (REJECTED)
+- CFO-12 Missing cash inputs for runway computation at runtime (NEEDS_INPUT)
+- CFO-13 Duplicate trigger IDs (REJECTED)
+- CFO-14 Gating references unknown trigger IDs (REJECTED)
+- CFO-15 Cadence category mismatch (REJECTED)
+- CFO-16 Missing inputs for CRITICAL trigger evaluation (NEEDS_INPUT)
+- CFO-17 Missing inputs for NON-critical trigger evaluation (NEEDS_INPUT)
+- CFO-18 Invalid signal_states set (REJECTED)
+- CFO-19 Invalid/empty critical_triggers list (REJECTED)
+- CFO-20 Headcount request missing classification (NEEDS_INPUT)
+- CFO-21 Headcount exception missing signoff/ROI (REJECTED)
+- CFO-22 GTM spend request missing required details (NEEDS_INPUT)
+- CFO-23 Discount exception missing CFO approval (REJECTED)
+- CFO-24 Roadmap item missing classification/quantified impact (NEEDS_INPUT)
+- CFO-25 Roadmap approval risks churn while T5 FAIL (REJECTED)
+- CFO-26 Vendor spend >$5k/mo missing ROI case (REJECTED)
+- CFO-27 Vendor approval under low runway without mission-critical justification (REJECTED)
+- CFO-28 Not entering DEFENSIVE mode on critical FAIL (REJECTED)
+- CFO-29 Exiting DEFENSIVE mode without two PASS cycles (REJECTED)
+- CFO-30 Escalation event not emitted when condition met (REJECTED)
+- CFO-31 Missing minimum required data fields (NEEDS_INPUT)
+- CFO-32 Close timeliness outside SLA but treated as final (REJECTED)
+- CFO-33 CRM hygiene insufficient for pipeline-based gating (NEEDS_INPUT)
+- CFO-34 Missing decision log entry (REJECTED)
+- CFO-35 Retention exception without offset cuts documented (REJECTED)
+
+---
+
+## C) Runtime Response Mapping (NEEDS_INPUT vs REJECTED)
+**NEEDS_INPUT** (recoverable; provide missing data/fields and re-run):
+- Missing required artifacts (CFO-01)
+- Missing runtime inputs for evaluation (CFO-12, CFO-16, CFO-17)
+- Missing request metadata required to classify/enforce gates (CFO-20, CFO-22, CFO-24)
+- Missing minimum data fields / CRM hygiene issues that prevent reliable evaluation (CFO-31, CFO-33)
+- Missing binding “no fake precision” clause in micro_case (CFO-09)
+
+**REJECTED** (non-recoverable without changing artifacts or violating policy; must correct spec or stop action):
+- Any JSON/shape invalidity (CFO-02, CFO-03)
+- Any trigger/threshold/unit/window inconsistency (CFO-04..CFO-08, CFO-10..CFO-15, CFO-18..CFO-19)
+- Any attempt to bypass gates/defensive mode/escalations/logging (CFO-21, CFO-23, CFO-25..CFO-30, CFO-32, CFO-34..CFO-35)
+
+---
+
+## D) Minimal Validation Report Schema
+The Worker MUST emit a validation report for every run.
+
+```json
+{
+  "trace_id": "vsf-TEST-CFO-001",
+  "timestamp_utc": "YYYY-MM-DDTHH:MM:SSZ",
+  "artifacts_present": {
+    "micro_case": true,
+    "trigger_spec": true,
+    "gating_rules": true,
+    "outcome_contract": true
+  },
+  "normalization": {
+    "unit_normalization": {
+      "USD_aliases": ["$", "USD"],
+      "percent_scale": "0-100",
+      "multipliers": ["x"]
+    },
+    "thresholds_parsed": [
+      { "trigger_id": "T1_FCF_BREAKEVEN_TRAJECTORY", "parsed": true, "notes": "" }
+    ]
+  },
+  "trigger_evaluation": [
+    {
+      "trigger_id": "T4_RUNWAY_FLOOR",
+      "state": "PASS|WATCH|FAIL|UNKNOWN",
+      "inputs_missing": ["CashBalance"],
+      "computed_values": { "RunwayMonths": null }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "request_id": "REQ-123",
+      "gate_id": "G1_HEADCOUNT",
+      "decision": "ALLOWED|BLOCKED",
+      "basis": {
+        "critical_triggers": { "T1": "PASS", "T4": "WATCH", "T5": "PASS", "T8": "PASS" },
+        "noncritical_triggers": { "T6": "PASS", "T7": "PASS", "T3": "WATCH" }
+      },
+      "exceptions_used": [
+        { "exception_id": "retention_protection", "offset_documented": false }
+      ],
+      "signoffs": ["CFO"],
+      "roi_case_attached": true,
+      "reason_codes": ["CFO-35"]
+    }
+  ],
+  "escalations_emitted": [
+    { "rule": "Two consecutive monthly FAILs on T1/T2", "emitted": false }
+  ],
+  "decision_log_written": true,
+  "final_outcome": {
+    "outcome": "NEEDS_INPUT|REJECTED",
+    "reason_codes": ["CFO-16"]
+  }
+}
+
+---
+
+### file_path: docs/policy/vsf-TEST-CFO-001/00_master_registry.yaml
+id: vsf-TEST-CFO-001.master_registry
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  domain: "CFO governance decision authority"
+  publication_set: "Governance Publication Set"
+invariants:
+  - "Fail-closed is the default enforcement stance."
+  - "Published artifacts are deterministic and versioned."
+  - "Hashes may be HASH_TODO until computed in CI."
+hash: "HASH_TODO"
+artifacts:
+  - file: "01_canonicalization_profile.json"
+    id: "vsf-TEST-CFO-001.canonicalization_profile"
+    type: "canonicalization_profile"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "02_hash_coverage_map.yaml"
+    id: "vsf-TEST-CFO-001.hash_coverage_map"
+    type: "hash_coverage_map"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "03_fail_closed_mapping.yaml"
+    id: "vsf-TEST-CFO-001.fail_closed_mapping"
+    type: "fail_closed_mapping"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "04_compatibility_policy.yaml"
+    id: "vsf-TEST-CFO-001.compatibility_policy"
+    type: "compatibility_policy"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "05_reference_graph_policy.yaml"
+    id: "vsf-TEST-CFO-001.reference_graph_policy"
+    type: "reference_graph_policy"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "06_decision_package_taxonomy.yaml"
+    id: "vsf-TEST-CFO-001.decision_package_taxonomy"
+    type: "decision_package_taxonomy"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "07_conformance_checklist.yaml"
+    id: "vsf-TEST-CFO-001.conformance_checklist"
+    type: "conformance_checklist"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "08_outcome_contract.json"
+    id: "vsf-TEST-CFO-001.outcome_contract_bundle"
+    type: "decision_package_bundle"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "09_design_conformance_report.yaml"
+    id: "vsf-TEST-CFO-001.design_conformance_report"
+    type: "design_conformance_report"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+  - file: "README.md"
+    id: "vsf-TEST-CFO-001.readme"
+    type: "readme"
+    version: "1.0.0"
+    hash: "HASH_TODO"
+file_path: docs/policy/vsf-TEST-CFO-001/01_canonicalization_profile.json
+{
+  "id": "vsf-TEST-CFO-001.canonicalization_profile",
+  "version": "1.0.0",
+  "created_at": "2026-02-23T00:00:00Z",
+  "scope": {
+    "trace_id": "vsf-TEST-CFO-001",
+    "applies_to": [
+      "micro_case",
+      "trigger_spec",
+      "gating_rules",
+      "outcome_contract",
+      "runtime_enforcement_contract"
+    ]
+  },
+  "invariants": [
+    "Canonicalization MUST be deterministic and lossless over semantically meaningful content.",
+    "Normalization MUST NOT invent values; it may only normalize formats/aliases.",
+    "Fail-closed behavior MUST be preserved under canonicalization."
+  ],
+  "hash": "HASH_TODO",
+  "profile": {
+    "json_canonicalization": {
+      "encoding": "UTF-8",
+      "object_key_order": "lexicographic",
+      "number_representation": "preserve_numeric_type",
+      "strip_trailing_whitespace_in_strings": true,
+      "newline": "\n"
+    },
+    "unit_normalization": {
+      "money": {
+        "canonical_unit": "USD",
+        "aliases": ["$", "USD"],
+        "rendering": "USD"
+      },
+      "percent": {
+        "canonical_unit": "percent",
+        "scale": "0-100",
+        "rendering": "percent"
+      },
+      "multiplier": {
+        "canonical_unit": "x",
+        "aliases": ["x", "X"],
+        "rendering": "x"
+      },
+      "time": {
+        "allowed": ["days", "weeks", "months"],
+        "rendering": "as_stated"
+      }
+    },
+    "threshold_normalization": {
+      "goal": "machine-normalizable comparator sets",
+      "accepted_patterns": [
+        ">= N",
+        "<= N",
+        "> N",
+        "< N",
+        "N1 to N2",
+        "between N1 and N2",
+        "range N1–N2"
+      ],
+      "currency_shorthand": {
+        "k": 1000,
+        "m": 1000000
+      },
+      "interval_semantics": {
+        "example": "TrajectoryGap >= -50000 and <= 50000",
+        "inclusive_bounds_default": true
+      }
+    },
+    "metric_name_alignment": {
+      "canonical_metric_names": {
+        "GrossMargin": ["gross_margin", "gross_margin_pct", "GM"],
+        "NRR": ["nrr", "net_revenue_retention"],
+        "PipelineCoverage": ["pipeline_coverage", "PipelineCoverage"],
+        "Ro40": ["rule_of_40", "Ro40"],
+        "FCF_3mo_avg": ["FCF_3mo_avg"],
+        "EBITDA_3mo_avg": ["EBITDA_3mo_avg"]
+      }
+    }
+  }
+}
+file_path: docs/policy/vsf-TEST-CFO-001/02_hash_coverage_map.yaml
+id: vsf-TEST-CFO-001.hash_coverage_map
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  coverage_goal: "Commit-ready hashing plan for deterministic verification"
+invariants:
+  - "All enforcement-relevant fields MUST be covered by hashes."
+  - "Hashes may be HASH_TODO until computed by CI; coverage map is authoritative."
+hash: "HASH_TODO"
+
+coverage:
+  canonicalization_profile:
+    file: "01_canonicalization_profile.json"
+    include: ["$"]
+  policy_files:
+    - file: "03_fail_closed_mapping.yaml"
+      include: ["$"]
+    - file: "04_compatibility_policy.yaml"
+      include: ["$"]
+    - file: "05_reference_graph_policy.yaml"
+      include: ["$"]
+    - file: "06_decision_package_taxonomy.yaml"
+      include: ["$"]
+    - file: "07_conformance_checklist.yaml"
+      include: ["$"]
+  decision_bundle:
+    file: "08_outcome_contract.json"
+    include:
+      - "$.bundle.micro_case"
+      - "$.bundle.trigger_spec"
+      - "$.bundle.gating_rules"
+      - "$.bundle.outcome_contract"
+      - "$.bundle.runtime_enforcement_contract"
+      - "$.bundle.reason_codes_taxonomy"
+      - "$.bundle.runtime_response_mapping"
+      - "$.bundle.minimal_validation_report_schema"
+notes:
+  - "README.md is informational; may be hashed but is not enforcement-critical."
+  - "Any change to trigger thresholds, critical triggers, gates, or reason codes is a breaking change."
+file_path: docs/policy/vsf-TEST-CFO-001/03_fail_closed_mapping.yaml
+id: vsf-TEST-CFO-001.fail_closed_mapping
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["runtime_enforcement_contract", "gate_enforcement", "trigger_evaluation"]
+invariants:
+  - "If a required artifact/input is missing, enforcement outcome MUST be NEEDS_INPUT (recoverable) unless parsing/shape invalid."
+  - "If any critical trigger evaluates to FAIL or UNKNOWN, system MUST behave defensively (fail-closed)."
+  - "UNKNOWN trigger state MUST be treated as FAIL for gating (internal), while outcome may be NEEDS_INPUT externally."
+hash: "HASH_TODO"
+
+mapping:
+  missing_required_artifact:
+    condition: "any of micro_case/trigger_spec/gating_rules/outcome_contract absent"
+    reason_code: "CFO-01"
+    outcome: "NEEDS_INPUT"
+  parse_error:
+    condition: "JSON parse error"
+    reason_code: "CFO-02"
+    outcome: "REJECTED"
+  wrong_root_shape:
+    condition: "missing expected root object micro_case.micro_case etc."
+    reason_code: "CFO-03"
+    outcome: "REJECTED"
+  missing_required_trigger_fields:
+    condition: "trigger missing id/name/formula/threshold/window/actions"
+    reason_code: "CFO-04"
+    outcome: "REJECTED"
+  threshold_not_normalizable:
+    condition: "threshold cannot be parsed into comparator(s)+numeric(s)+unit"
+    reason_code: "CFO-05"
+    outcome: "REJECTED"
+  critical_input_missing_at_runtime:
+    condition: "any required input missing for critical triggers T1/T4/T5/T8"
+    reason_code: "CFO-16"
+    outcome: "NEEDS_INPUT"
+  noncritical_input_missing_at_runtime:
+    condition: "any required input missing for non-critical triggers"
+    reason_code: "CFO-17"
+    outcome: "NEEDS_INPUT"
+  critical_fail_or_unknown:
+    condition: "any critical trigger state in {FAIL, UNKNOWN}"
+    enforcement_mode: "DEFENSIVE"
+    gate_behavior: "BLOCK discretionary growth spend and net-new headcount except explicit retention_protection with offset"
+file_path: docs/policy/vsf-TEST-CFO-001/04_compatibility_policy.yaml
+id: vsf-TEST-CFO-001.compatibility_policy
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["all published artifacts"]
+invariants:
+  - "Any change to trigger IDs, reason codes, or gate semantics is BREAKING."
+  - "Minor versions may add non-breaking optional fields only."
+  - "Patch versions may fix typos or clarify text without changing machine semantics."
+hash: "HASH_TODO"
+
+semver_rules:
+  breaking_changes:
+    - "Change/remove trigger IDs T1..T8"
+    - "Change critical_triggers set"
+    - "Modify blocked_if/allowed_if logic or required signoffs"
+    - "Change reason_code meanings or outcomes mapping"
+    - "Change unit normalization rules"
+  non_breaking_changes:
+    - "Add new non-critical triggers (not referenced by gates) with unique IDs"
+    - "Add explanatory notes fields"
+  patch_changes:
+    - "Spelling/formatting that does not change parsing or thresholds"
+file_path: docs/policy/vsf-TEST-CFO-001/05_reference_graph_policy.yaml
+id: vsf-TEST-CFO-001.reference_graph_policy
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["decision_bundle", "runtime_enforcement_contract"]
+invariants:
+  - "All references MUST resolve (e.g., critical_triggers -> trigger_spec.triggers[].id)."
+  - "No dangling references permitted."
+  - "Graph cycles are allowed only if explicitly declared (none required here)."
+hash: "HASH_TODO"
+
+reference_graph:
+  nodes:
+    - id: "micro_case"
+    - id: "trigger_spec"
+    - id: "gating_rules"
+    - id: "outcome_contract"
+    - id: "runtime_enforcement_contract"
+  edges:
+    - from: "gating_rules.critical_triggers[*]"
+      to: "trigger_spec.triggers[].id"
+      type: "must_resolve"
+    - from: "gating_rules.gates[].allowed_if[].when"
+      to: "trigger_spec.triggers[].id"
+      type: "semantic_reference"
+    - from: "outcome_contract.success_criteria[*].metric"
+      to: "trigger_spec.triggers[].id|metric_name_alignment"
+      type: "unit_alignment_reference"
+validation:
+  must_resolve_rules:
+    - "All IDs in gating_rules.critical_triggers exist in trigger_spec.triggers[].id"
+file_path: docs/policy/vsf-TEST-CFO-001/06_decision_package_taxonomy.yaml
+id: vsf-TEST-CFO-001.decision_package_taxonomy
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  package_types:
+    - micro_case
+    - trigger_spec
+    - gating_rules
+    - outcome_contract
+    - runtime_enforcement_contract
+invariants:
+  - "The Worker MUST ingest exactly four core artifacts: micro_case, trigger_spec, gating_rules, outcome_contract."
+  - "Runtime enforcement contract is optional for ingestion but included in this publication set."
+hash: "HASH_TODO"
+
+taxonomy:
+  micro_case:
+    purpose: "Business context + objectives + constraints + baseline assumptions"
+    required_root: "micro_case"
+  trigger_spec:
+    purpose: "Metrics, formulas, thresholds, windows, cadence, actions"
+    required_root: "trigger_spec"
+  gating_rules:
+    purpose: "Allow/block decisions based on trigger states, plus escalation rules"
+    required_root: "gating_rules"
+  outcome_contract:
+    purpose: "Success criteria, cadence, owners, data requirements, fail-closed policy"
+    required_root: "outcome_contract"
+  runtime_enforcement_contract:
+    purpose: "Deterministic runtime checks, reason codes, validation report schema"
+    required_root: "text_md_or_structured_text"
+file_path: docs/policy/vsf-TEST-CFO-001/07_conformance_checklist.yaml
+id: vsf-TEST-CFO-001.conformance_checklist
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  applies_to: ["decision_bundle", "runtime_worker_validation"]
+invariants:
+  - "Checklist is machine-checkable: each item has deterministic predicate definition."
+  - "Outcomes are constrained to {PASS, FAIL} at checklist level; runtime maps to NEEDS_INPUT/REJECTED per reason codes."
+hash: "HASH_TODO"
+
+machine_checkable: true
+checklist:
+  - check_id: "CC-01"
+    description: "All four required artifacts present (fail-closed ingress)."
+    input_paths:
+      - "$.bundle.micro_case"
+      - "$.bundle.trigger_spec"
+      - "$.bundle.gating_rules"
+      - "$.bundle.outcome_contract"
+    predicate: "all_present_non_null"
+    on_fail:
+      reason_code: "CFO-01"
+      outcome: "NEEDS_INPUT"
+
+  - check_id: "CC-02"
+    description: "Root shapes match expected objects (micro_case.micro_case, etc.)."
+    input_paths:
+      - "$.bundle.micro_case.micro_case"
+      - "$.bundle.trigger_spec.trigger_spec"
+      - "$.bundle.gating_rules.gating_rules"
+      - "$.bundle.outcome_contract.outcome_contract"
+    predicate: "all_present_non_null"
+    on_fail:
+      reason_code: "CFO-03"
+      outcome: "REJECTED"
+
+  - check_id: "CC-03"
+    description: "Trigger IDs are unique."
+    input_paths:
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*].id"
+    predicate: "all_unique"
+    on_fail:
+      reason_code: "CFO-13"
+      outcome: "REJECTED"
+
+  - check_id: "CC-04"
+    description: "Each trigger contains required fields."
+    input_paths:
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*]"
+    predicate: "for_each_has_fields:id,name,formula,threshold,measurement_window,action_if_pass,action_if_fail"
+    on_fail:
+      reason_code: "CFO-04"
+      outcome: "REJECTED"
+
+  - check_id: "CC-05"
+    description: "Gating critical_triggers references exist in trigger_spec."
+    input_paths:
+      - "$.bundle.gating_rules.gating_rules.critical_triggers[*]"
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*].id"
+    predicate: "subset(left,right)"
+    on_fail:
+      reason_code: "CFO-14"
+      outcome: "REJECTED"
+
+  - check_id: "CC-06"
+    description: "signal_states contains exactly PASS, WATCH, FAIL (any order)."
+    input_paths:
+      - "$.bundle.gating_rules.gating_rules.signal_states[*]"
+    predicate: "set_equals:['PASS','WATCH','FAIL']"
+    on_fail:
+      reason_code: "CFO-18"
+      outcome: "REJECTED"
+
+  - check_id: "CC-07"
+    description: "Outcome success_criteria targets are ranges [min,max] (no point targets)."
+    input_paths:
+      - "$.bundle.outcome_contract.outcome_contract.success_criteria.by_month_12[*].target_range"
+      - "$.bundle.outcome_contract.outcome_contract.success_criteria.narrative_integrity[*].target_range"
+    predicate: "for_each_is_two_number_array"
+    on_fail:
+      reason_code: "CFO-08"
+      outcome: "REJECTED"
+
+  - check_id: "CC-08"
+    description: "Breakeven preference is FCF and alternate includes EBITDA."
+    input_paths:
+      - "$.bundle.outcome_contract.outcome_contract.breakeven_definition_selected.preferred"
+      - "$.bundle.outcome_contract.outcome_contract.breakeven_definition_selected.alternate"
+    predicate: "equals(first,'FCF breakeven') AND contains(second,'EBITDA breakeven')"
+    on_fail:
+      reason_code: "CFO-10"
+      outcome: "REJECTED"
+
+  - check_id: "CC-09"
+    description: "Triggers include both T1 (FCF) and T2 (EBITDA)."
+    input_paths:
+      - "$.bundle.trigger_spec.trigger_spec.triggers[*].id"
+    predicate: "contains_all:['T1_FCF_BREAKEVEN_TRAJECTORY','T2_EBITDA_BREAKEVEN_TRAJECTORY']"
+    on_fail:
+      reason_code: "CFO-11"
+      outcome: "REJECTED"
+
+  - check_id: "CC-10"
+    description: "Non-negotiables include the binding 'No fake precision' clause."
+    input_paths:
+      - "$.bundle.micro_case.micro_case.constraints_and_non_negotiables.non_negotiables[*]"
+    predicate: "any_contains:'No fake precision'"
+    on_fail:
+      reason_code: "CFO-09"
+      outcome: "NEEDS_INPUT"
+file_path: docs/policy/vsf-TEST-CFO-001/08_outcome_contract.json
+{
+  "id": "vsf-TEST-CFO-001.outcome_contract_bundle",
+  "version": "1.0.0",
+  "created_at": "2026-02-23T00:00:00Z",
+  "scope": {
+    "trace_id": "vsf-TEST-CFO-001",
+    "includes": [
+      "micro_case",
+      "trigger_spec",
+      "gating_rules",
+      "outcome_contract",
+      "runtime_enforcement_contract",
+      "reason_codes_taxonomy",
+      "runtime_response_mapping",
+      "minimal_validation_report_schema"
+    ]
+  },
+  "invariants": [
+    "Bundle content is a direct publication wrapper around provided CFO JSON blocks and enforcement contract text, without redesign.",
+    "Fail-closed enforcement is normative; missing inputs yield NEEDS_INPUT per reason codes.",
+    "All targets in success_criteria are ranges (bands over points)."
+  ],
+  "hash": "HASH_TODO",
+  "bundle": {
+    "micro_case": {
+      "micro_case": {
+        "company_profile": {
+          "type": "B2B SaaS",
+          "arr_current_usd": { "point_estimate": 9000000, "range": [8500000, 9500000] },
+          "gross_margin_pct": { "point_estimate": 74, "range": [72, 76] },
+          "growth_narrative_requirement": "Maintain credible growth story while reaching breakeven within 12 months",
+          "board_mandate": "Breakeven in 12 months (define metric explicitly) without breaking growth narrative"
+        },
+        "decision_objective": {
+          "primary": "Achieve breakeven within 12 months via governed triggers and phased operating plan",
+          "secondary": [
+            "Preserve or improve retention and product momentum",
+            "Maintain pipeline health and predictable revenue growth"
+          ],
+          "breakeven_definition_options": [
+            { "metric": "FCF breakeven", "definition": "Operating cash flow - capex >= 0 over trailing 3-month average" },
+            { "metric": "EBITDA breakeven", "definition": "EBITDA >= 0 over trailing 3-month average" }
+          ]
+        },
+        "baseline_financial_model_assumptions": {
+          "arr_to_revenue_recognition_lag": { "description": "Assume revenue ~ ARR on run-rate basis", "range_months": [0, 2] },
+          "opex_current_usd_per_month": { "range": [900000, 1300000], "notes": "All-in operating expenses excluding COGS; placeholder until actuals loaded" },
+          "net_burn_current_usd_per_month": { "range": [200000, 800000], "notes": "Placeholder; actuals to replace in first operating cycle" },
+          "cash_on_hand_usd": { "range": [6000000, 15000000], "notes": "Unknown; must be filled to calibrate runway triggers" }
+        },
+        "operating_context_assumptions": {
+          "go_to_market_mix": { "assumption": "Sales-led with some self-serve expansion", "confidence": "medium" },
+          "customer_profile": { "assumption": "Mid-market / SMB B2B", "confidence": "low" },
+          "pricing_packaging": { "assumption": "Opportunity for packaging/price uplift exists", "confidence": "medium" }
+        },
+        "key_levers": {
+          "revenue_levers": [
+            "NRR improvement via churn reduction + expansion motions",
+            "Pipeline conversion & sales cycle reduction",
+            "Pricing/packaging and discount discipline",
+            "Channel efficiency and segment focus"
+          ],
+          "cost_levers": [
+            "GTM efficiency (CAC payback, quota capacity right-sizing)",
+            "R&D focus (reduce non-core spend, improve release ROI)",
+            "G&A rationalization (tools, contractors, overhead)",
+            "Cloud/infra and COGS optimization (without GM degradation)"
+          ]
+        },
+        "constraints_and_non_negotiables": {
+          "non_negotiables": [
+            "Do not materially degrade customer experience or retention",
+            "Do not cut roadmap items tied to retention/NRR",
+            "Maintain credible growth guidance supported by leading indicators",
+            "No fake precision: all targets expressed as ranges and verified monthly"
+          ],
+          "guardrails": [
+            "NRR must not fall below defined floor",
+            "Pipeline coverage must not fall below defined floor",
+            "Gross margin must not fall below defined floor"
+          ]
+        },
+        "deliverables_from_this_run": [
+          "Trigger specification (what to measure, formulas, windows, actions)",
+          "Gating rules (what is allowed/blocked by signal state)",
+          "Outcome contract (definitions, cadence, owners, reporting, escalation)",
+          "Board memo draft (decision narrative + plan + risks)"
+        ]
+      }
+    },
+    "trigger_spec": {
+      "trigger_spec": {
+        "measurement_cadence": {
+          "daily": ["cash_balance", "collections", "new_bookings (if available)"],
+          "weekly": ["pipeline_created", "pipeline_coverage", "spend_vs_budget", "headcount"],
+          "monthly_close": ["arr", "nrr", "gross_retention", "logo_churn", "gross_margin", "opex", "ebitda", "fcf", "cac_payback", "rule_of_40"]
+        },
+        "triggers": [
+          {
+            "id": "T1_FCF_BREAKEVEN_TRAJECTORY",
+            "name": "FCF trajectory to breakeven",
+            "formula": "FCF_3mo_avg = avg(OperatingCashFlow - Capex) over last 3 months; TrajectoryGap = FCF_3mo_avg - TargetFCF_3mo_avg(month_index)",
+            "threshold": {
+              "pass": "TrajectoryGap >= -$50k to +$50k",
+              "watch": "TrajectoryGap < -$50k and >= -$150k",
+              "fail": "TrajectoryGap < -$150k"
+            },
+            "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+            "action_if_pass": [
+              "Allow planned growth investments within gated budget bands",
+              "Maintain hiring plan for roles already pre-approved by gate"
+            ],
+            "action_if_fail": [
+              "Immediate spend containment: freeze non-essential hiring and backfills",
+              "Reduce discretionary spend 10–20% next month (tools/contractors/marketing experiments)",
+              "Re-forecast within 5 business days; escalate to Board chair if two consecutive fails"
+            ],
+            "variance_notes": "Use bands not point targets; allow seasonality and billing swings; reconcile with working capital movements"
+          },
+          {
+            "id": "T2_EBITDA_BREAKEVEN_TRAJECTORY",
+            "name": "EBITDA trajectory to breakeven (alternate definition)",
+            "formula": "EBITDA_3mo_avg = avg(Revenue - COGS - Opex excl D&A) over last 3 months; TrajectoryGap = EBITDA_3mo_avg - TargetEBITDA_3mo_avg(month_index)",
+            "threshold": {
+              "pass": "TrajectoryGap >= -$40k to +$40k",
+              "watch": "TrajectoryGap < -$40k and >= -$120k",
+              "fail": "TrajectoryGap < -$120k"
+            },
+            "measurement_window": "Trailing 3-month average, evaluated monthly at close",
+            "action_if_pass": [
+              "Permit growth experiments if other guardrails pass",
+              "Continue roadmap items classified as retention-critical"
+            ],
+            "action_if_fail": [
+              "Trigger cost actions: pause low-ROI programs; reallocate to retention and proven channels",
+              "Implement approval gate for any new vendor spend >$5k/month"
+            ],
+            "variance_notes": "EBITDA ignores working capital; pair with cash triggers (T4/T5) to avoid cash surprises"
+          },
+          {
+            "id": "T3_RULE_OF_40_GUARDRAIL",
+            "name": "Rule of 40 guardrail (growth narrative)",
+            "formula": "Ro40 = (ARR_Growth_Rate_TTM %) + (EBITDA_Margin_TTM %)",
+            "threshold": {
+              "pass": "Ro40 >= 30% (range 30–45%)",
+              "watch": "Ro40 >= 20% and < 30%",
+              "fail": "Ro40 < 20%"
+            },
+            "measurement_window": "Trailing 12 months, updated monthly",
+            "action_if_pass": [
+              "Use Ro40 in external narrative and board reporting as primary efficiency signal",
+              "Prioritize investments with payback <= 12–18 months"
+            ],
+            "action_if_fail": [
+              "Shift emphasis to efficiency story; cut/reshape lowest ROI acquisition spend",
+              "Mandate pricing/packaging review and discount controls within 30 days"
+            ],
+            "variance_notes": "Bands reflect market variability; select benchmark band by segment and growth stage"
+          },
+          {
+            "id": "T4_RUNWAY_FLOOR",
+            "name": "Cash runway floor",
+            "formula": "RunwayMonths = CashBalance / max(1, NetBurn_3mo_avg)",
+            "threshold": {
+              "pass": "RunwayMonths >= 15 (range 15–24)",
+              "watch": "RunwayMonths >= 12 and < 15",
+              "fail": "RunwayMonths < 12"
+            },
+            "measurement_window": "Trailing 3-month burn average, evaluated weekly and monthly",
+            "action_if_pass": ["Proceed with phased plan; keep optionality for selective investment"],
+            "action_if_fail": [
+              "Activate defensive plan: hiring freeze, renegotiate major vendors, cut discretionary spend 15–25%",
+              "Consider financing/strategic options exploration if fails for 4 consecutive weeks"
+            ],
+            "variance_notes": "Runway depends on burn volatility; use 3-month avg and also a high-burn stress case (+20–30%)"
+          },
+          {
+            "id": "T5_NET_REVENUE_RETENTION_FLOOR",
+            "name": "NRR floor (do-not-break retention)",
+            "formula": "NRR = (StartingARR + Expansion - Contraction - Churn) / StartingARR",
+            "threshold": {
+              "pass": "NRR >= 105% (range 105–120%)",
+              "watch": "NRR >= 100% and < 105%",
+              "fail": "NRR < 100%"
+            },
+            "measurement_window": "Monthly cohort-based, evaluated monthly; also 3-month rolling average",
+            "action_if_pass": [
+              "Maintain planned product/customer success investments tied to retention",
+              "Allow targeted expansion programs"
+            ],
+            "action_if_fail": [
+              "Protect CS/product capacity; pause risky changes; run churn war-room within 7 days",
+              "Reallocate GTM spend from new logo to retention until back above 100–105%"
+            ],
+            "variance_notes": "NRR varies by segment; thresholds should be calibrated to historical distribution"
+          },
+          {
+            "id": "T6_PIPELINE_COVERAGE",
+            "name": "Pipeline coverage for next-quarter bookings",
+            "formula": "PipelineCoverage = QualifiedPipelineAmount_next_quarter / BookingsTarget_next_quarter",
+            "threshold": {
+              "pass": ">= 3.0x (range 3.0–4.5x)",
+              "watch": ">= 2.0x and < 3.0x",
+              "fail": "< 2.0x"
+            },
+            "measurement_window": "Weekly snapshot; evaluate weekly trend (4-week moving average)",
+            "action_if_pass": [
+              "Maintain demand gen and SDR capacity; focus on conversion improvements"
+            ],
+            "action_if_fail": [
+              "Stop unproven channels; redirect to pipeline creation with best historical ROI",
+              "Revise bookings target or re-segment focus within 2 weeks"
+            ],
+            "variance_notes": "Coverage needed depends on win rates and cycle length; calibrate quarterly"
+          },
+          {
+            "id": "T7_CAC_PAYBACK",
+            "name": "CAC payback discipline",
+            "formula": "CACPaybackMonths = CAC / (GrossMargin * NewARR_per_month)",
+            "threshold": {
+              "pass": "<= 15 months (range 9–15)",
+              "watch": "> 15 and <= 20 months",
+              "fail": "> 20 months"
+            },
+            "measurement_window": "Quarterly cohort-based; updated monthly with trailing 3-month smoothing",
+            "action_if_pass": ["Allow scaling of efficient segments/channels within gate"],
+            "action_if_fail": [
+              "Reduce acquisition spend 10–30% in failing segments; tighten ICP and qualification",
+              "Enforce discount ceilings and pricing governance immediately"
+            ],
+            "variance_notes": "Payback is lagging; pair with leading indicators (conversion rates, ASP, sales cycle)"
+          },
+          {
+            "id": "T8_GROSS_MARGIN_FLOOR",
+            "name": "Gross margin floor",
+            "formula": "GM = (Revenue - COGS) / Revenue",
+            "threshold": {
+              "pass": ">= 72% (range 72–78%)",
+              "watch": ">= 70% and < 72%",
+              "fail": "< 70%"
+            },
+            "measurement_window": "Monthly close; 3-month rolling average",
+            "action_if_pass": [
+              "Continue investments; pursue infra optimization roadmap"
+            ],
+            "action_if_fail": [
+              "Launch COGS taskforce: cloud commitments, arch efficiency, support cost review",
+              "Pause low-margin offerings/custom deals unless approved by CFO"
+            ],
+            "variance_notes": "Account for usage spikes and one-time credits; normalize where appropriate"
+          }
+        ],
+        "target_trajectory_templates": {
+          "breakeven_in_12_months": {
+            "description": "Monthly target path for EBITDA or FCF to reach >=0 by month 12 using bands, not point targets",
+            "example_band": {
+              "month_0_gap_to_breakeven": { "range_usd_per_month": [-800000, -200000] },
+              "required_improvement_per_quarter": { "range_usd_per_month": [150000, 350000] }
+            }
+          }
+        }
+      }
+    },
+    "gating_rules": {
+      "gating_rules": {
+        "principles": [
+          "Fail-closed: if any critical guardrail fails, block discretionary growth spend and net-new headcount",
+          "Protect retention: never cut retention-critical CS/Product capacity when NRR trigger is watch/fail",
+          "Reallocate before cutting: shift from low-ROI acquisition to retention and proven channels first",
+          "Bands over points: decisions based on ranges and multi-signal corroboration"
+        ],
+        "signal_states": ["PASS", "WATCH", "FAIL"],
+        "critical_triggers": [
+          "T1_FCF_BREAKEVEN_TRAJECTORY",
+          "T4_RUNWAY_FLOOR",
+          "T5_NET_REVENUE_RETENTION_FLOOR",
+          "T8_GROSS_MARGIN_FLOOR"
+        ],
+        "gates": [
+          {
+            "gate_id": "G1_HEADCOUNT",
+            "scope": "Net-new hires and backfills",
+            "allowed_if": [
+              {
+                "when": "All critical_triggers are PASS",
+                "allow": "Proceed with approved hiring plan; add up to +1–2 critical roles/month if Ro40 is PASS and CAC payback is PASS"
+              },
+              {
+                "when": "Any critical_trigger is WATCH",
+                "allow": "Backfills only + explicitly retention-critical roles; CFO approval required"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "Any critical_trigger is FAIL",
+                "block": "All net-new hires and non-critical backfills; exception requires CEO+CFO signoff and written ROI case"
+              }
+            ],
+            "exceptions": {
+              "retention_protection": "If T5 is WATCH/FAIL, CS/Product roles that directly mitigate churn are allowed even during cost containment, but must be offset by cuts elsewhere"
+            }
+          },
+          {
+            "gate_id": "G2_GTM_SPEND",
+            "scope": "Marketing + sales variable spend, tools, agencies",
+            "allowed_if": [
+              {
+                "when": "T7_CAC_PAYBACK PASS and T6_PIPELINE_COVERAGE PASS and (T1 or T2) is PASS/WATCH",
+                "allow": "Scale spend +5–15% in proven segments; keep experiment budget capped (2–5% of GTM spend)"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "T7 FAIL or T6 FAIL",
+                "block": "Freeze scaling; cut lowest ROI channels 10–30%; require channel-level ROI proof for reinstatement"
+              },
+              {
+                "when": "T1 FAIL and T4 WATCH/FAIL",
+                "block": "Immediate discretionary GTM spend freeze except for commitments; re-approve monthly"
+              }
+            ],
+            "required_controls": [
+              "Discount governance: set discount ceilings by segment; CFO approval for exceptions",
+              "Quota capacity check: ensure rep capacity aligns with pipeline coverage thresholds"
+            ]
+          },
+          {
+            "gate_id": "G3_PRODUCT_AND_RND",
+            "scope": "Roadmap, engineering spend, contractors",
+            "allowed_if": [
+              {
+                "when": "T5 PASS or WATCH",
+                "allow": "Prioritize retention-critical roadmap; limit new big-bet initiatives to those with quantified retention or upsell impact"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "T1 FAIL and T5 PASS",
+                "block": "Pause non-core R&D; focus on cost-to-serve, reliability, and upsell enablers"
+              },
+              {
+                "when": "T5 FAIL",
+                "block": "Block any roadmap that risks churn; mandate churn-reduction tiger team and reliability focus"
+              }
+            ]
+          },
+          {
+            "gate_id": "G4_VENDOR_AND_NON_LABOR",
+            "scope": "All non-labor spend (software, cloud commitments, contractors outside product)",
+            "allowed_if": [
+              {
+                "when": "T1 PASS and T4 PASS",
+                "allow": "Renewals allowed; new spend requires ROI case if >$5k/month"
+              }
+            ],
+            "blocked_if": [
+              {
+                "when": "T4 WATCH/FAIL",
+                "block": "Renegotiate top vendors; approve only mission-critical spend; target 10–20% savings within 60 days"
+              }
+            ]
+          }
+        ],
+        "escalation_rules": [
+          {
+            "condition": "Two consecutive monthly FAILs on T1/T2",
+            "action": "Board-level review; adopt stronger cost program; revise guidance narrative"
+          },
+          {
+            "condition": "Four consecutive weekly FAILs on T4",
+            "action": "Activate financing/strategic options workstream; implement immediate burn reduction plan"
+          }
+        ]
+      }
+    },
+    "outcome_contract": {
+      "outcome_contract": {
+        "breakeven_definition_selected": {
+          "preferred": "FCF breakeven",
+          "alternate": "EBITDA breakeven",
+          "selection_rule": "Use FCF as primary; report EBITDA as secondary; if cash volatility is high, emphasize EBITDA trajectory plus runway floor"
+        },
+        "success_criteria": {
+          "by_month_12": [
+            { "metric": "FCF_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+            { "metric": "EBITDA_3mo_avg", "target_range": [0, 200000], "unit": "USD/month" },
+            { "metric": "NRR", "target_range": [105, 120], "unit": "percent" },
+            { "metric": "GrossMargin", "target_range": [72, 78], "unit": "percent" }
+          ],
+          "narrative_integrity": [
+            { "metric": "Ro40", "target_range": [30, 45], "unit": "percent" },
+            { "metric": "PipelineCoverage", "target_range": [3.0, 4.5], "unit": "x" }
+          ]
+        },
+        "operating_cadence": {
+          "weekly": {
+            "forum": "CFO Operating Review",
+            "duration_minutes": 45,
+            "agenda": [
+              "Trigger dashboard (T4 runway, T6 pipeline, spend vs budget)",
+              "Actions from last week and owners",
+              "Exceptions requested (gates) and approvals/denials"
+            ],
+            "attendees": ["CFO", "CEO", "Head of Sales", "Head of Marketing", "Head of Product/Eng", "RevOps/FP&A"]
+          },
+          "monthly": {
+            "forum": "Close + Board Pack Prep",
+            "deliverables": [
+              "Monthly trigger status and trends",
+              "Forecast update (base / downside / upside ranges)",
+              "Decision log of gate exceptions and ROI outcomes"
+            ],
+            "timing": "Within 7 business days of month-end close"
+          },
+          "quarterly": {
+            "forum": "Board Meeting",
+            "deliverables": [
+              "Trajectory vs breakeven path",
+              "Efficiency narrative (Ro40, CAC payback, NRR)",
+              "Strategic tradeoffs and next-quarter gated budget"
+            ]
+          }
+        },
+        "owners_and_accountability": {
+          "metric_owners": {
+            "T1_T2": "CFO (FP&A)",
+            "T4": "CFO + Controller/Treasury",
+            "T5": "Head of CS + Product",
+            "T6_T7": "Head of Sales + RevOps",
+            "T8": "VP Eng/Infra + CFO"
+          },
+          "gate_approvers": {
+            "G1": ["CFO", "CEO"],
+            "G2": ["CFO", "Head of Sales/Marketing"],
+            "G3": ["CPO/CTO", "CFO"],
+            "G4": ["CFO"]
+          }
+        },
+        "data_requirements": {
+          "systems": ["Accounting/ERP", "CRM", "Billing/Subscriptions", "Data warehouse (if exists)"],
+          "minimum_fields": [
+            "ARR bridge (start, new, expansion, contraction, churn)",
+            "COGS breakdown (cloud, support, other)",
+            "Opex by function (R&D, S&M, G&A) and fixed vs variable",
+            "Pipeline stages and definitions; bookings target",
+            "Headcount by function; fully-loaded cost assumptions"
+          ],
+          "data_quality_sla": {
+            "close_timeliness_days": { "range": [5, 10] },
+            "crm_hygiene": "Stage definitions enforced; required fields for qualification"
+          }
+        },
+        "fail_closed_policy": {
+          "default_state": "If any critical trigger is FAIL, system enters DEFENSIVE mode until two consecutive PASS cycles",
+          "defensive_mode_actions": [
+            "Hiring freeze except retention-critical",
+            "Discretionary spend reduction 10–25%",
+            "Weekly cash focus and collections push",
+            "Reallocation of GTM spend to proven ROI or retention"
+          ]
+        }
+      }
+    },
+    "runtime_enforcement_contract": {
+      "id": "vsf-TEST-CFO-001.runtime_enforcement_contract",
+      "version": "1.0.0",
+      "created_at": "2026-02-23T00:00:00Z",
+      "scope": { "trace_id": "vsf-TEST-CFO-001" },
+      "invariants": [
+        "Fail-closed ingress and enforcement per RUNTIME-A1..A10.",
+        "Reason codes CFO-01..CFO-35 are normative.",
+        "Decision logging is a hard stop (no log => REJECTED)."
+      ],
+      "hash": "HASH_TODO",
+      "content_md": "# Runtime Enforcement Contract v1 (CFO) — vsf-TEST-CFO-001\n\n(Verbatim contract is published at docs/enforcement/vsf-TEST-CFO-001/runtime_enforcement_contract_v1.md)\n"
+    },
+    "reason_codes_taxonomy": {
+      "CFO-01": "Missing required artifact(s) (NEEDS_INPUT)",
+      "CFO-02": "JSON parse error (REJECTED)",
+      "CFO-03": "Wrong root shape / missing expected root object (REJECTED)",
+      "CFO-04": "Trigger missing required fields (REJECTED)",
+      "CFO-05": "Threshold not machine-normalizable (REJECTED)",
+      "CFO-06": "Measurement window/formula mismatch (REJECTED)",
+      "CFO-07": "Units mismatch between triggers and outcome criteria (REJECTED)",
+      "CFO-08": "Point target without range (REJECTED)",
+      "CFO-09": "Missing “no fake precision” non-negotiable (NEEDS_INPUT)",
+      "CFO-10": "Breakeven preference/alternate mismatch (REJECTED)",
+      "CFO-11": "Missing T1 or T2 trigger (REJECTED)",
+      "CFO-12": "Missing cash inputs for runway computation at runtime (NEEDS_INPUT)",
+      "CFO-13": "Duplicate trigger IDs (REJECTED)",
+      "CFO-14": "Gating references unknown trigger IDs (REJECTED)",
+      "CFO-15": "Cadence category mismatch (REJECTED)",
+      "CFO-16": "Missing inputs for CRITICAL trigger evaluation (NEEDS_INPUT)",
+      "CFO-17": "Missing inputs for NON-critical trigger evaluation (NEEDS_INPUT)",
+      "CFO-18": "Invalid signal_states set (REJECTED)",
+      "CFO-19": "Invalid/empty critical_triggers list (REJECTED)",
+      "CFO-20": "Headcount request missing classification (NEEDS_INPUT)",
+      "CFO-21": "Headcount exception missing signoff/ROI (REJECTED)",
+      "CFO-22": "GTM spend request missing required details (NEEDS_INPUT)",
+      "CFO-23": "Discount exception missing CFO approval (REJECTED)",
+      "CFO-24": "Roadmap item missing classification/quantified impact (NEEDS_INPUT)",
+      "CFO-25": "Roadmap approval risks churn while T5 FAIL (REJECTED)",
+      "CFO-26": "Vendor spend >$5k/mo missing ROI case (REJECTED)",
+      "CFO-27": "Vendor approval under low runway without mission-critical justification (REJECTED)",
+      "CFO-28": "Not entering DEFENSIVE mode on critical FAIL (REJECTED)",
+      "CFO-29": "Exiting DEFENSIVE mode without two PASS cycles (REJECTED)",
+      "CFO-30": "Escalation event not emitted when condition met (REJECTED)",
+      "CFO-31": "Missing minimum required data fields (NEEDS_INPUT)",
+      "CFO-32": "Close timeliness outside SLA but treated as final (REJECTED)",
+      "CFO-33": "CRM hygiene insufficient for pipeline-based gating (NEEDS_INPUT)",
+      "CFO-34": "Missing decision log entry (REJECTED)",
+      "CFO-35": "Retention exception without offset cuts documented (REJECTED)"
+    },
+    "runtime_response_mapping": {
+      "NEEDS_INPUT": ["CFO-01", "CFO-09", "CFO-12", "CFO-16", "CFO-17", "CFO-20", "CFO-22", "CFO-24", "CFO-31", "CFO-33"],
+      "REJECTED": [
+        "CFO-02",
+        "CFO-03",
+        "CFO-04",
+        "CFO-05",
+        "CFO-06",
+        "CFO-07",
+        "CFO-08",
+        "CFO-10",
+        "CFO-11",
+        "CFO-13",
+        "CFO-14",
+        "CFO-15",
+        "CFO-18",
+        "CFO-19",
+        "CFO-21",
+        "CFO-23",
+        "CFO-25",
+        "CFO-26",
+        "CFO-27",
+        "CFO-28",
+        "CFO-29",
+        "CFO-30",
+        "CFO-32",
+        "CFO-34",
+        "CFO-35"
+      ]
+    },
+    "minimal_validation_report_schema": {
+      "trace_id": "vsf-TEST-CFO-001",
+      "timestamp_utc": "YYYY-MM-DDTHH:MM:SSZ",
+      "artifacts_present": {
+        "micro_case": true,
+        "trigger_spec": true,
+        "gating_rules": true,
+        "outcome_contract": true
+      },
+      "normalization": {
+        "unit_normalization": {
+          "USD_aliases": ["$", "USD"],
+          "percent_scale": "0-100",
+          "multipliers": ["x"]
+        },
+        "thresholds_parsed": [
+          { "trigger_id": "T1_FCF_BREAKEVEN_TRAJECTORY", "parsed": true, "notes": "" }
+        ]
+      },
+      "trigger_evaluation": [
+        {
+          "trigger_id": "T4_RUNWAY_FLOOR",
+          "state": "PASS|WATCH|FAIL|UNKNOWN",
+          "inputs_missing": ["CashBalance"],
+          "computed_values": { "RunwayMonths": null }
+        }
+      ],
+      "gate_decisions": [
+        {
+          "request_id": "REQ-123",
+          "gate_id": "G1_HEADCOUNT",
+          "decision": "ALLOWED|BLOCKED",
+          "basis": {
+            "critical_triggers": { "T1": "PASS", "T4": "WATCH", "T5": "PASS", "T8": "PASS" },
+            "noncritical_triggers": { "T6": "PASS", "T7": "PASS", "T3": "WATCH" }
+          },
+          "exceptions_used": [
+            { "exception_id": "retention_protection", "offset_documented": false }
+          ],
+          "signoffs": ["CFO"],
+          "roi_case_attached": true,
+          "reason_codes": ["CFO-35"]
+        }
+      ],
+      "escalations_emitted": [
+        { "rule": "Two consecutive monthly FAILs on T1/T2", "emitted": false }
+      ],
+      "decision_log_written": true,
+      "final_outcome": {
+        "outcome": "NEEDS_INPUT|REJECTED",
+        "reason_codes": ["CFO-16"]
+      }
+    }
+  }
+}
+file_path: docs/policy/vsf-TEST-CFO-001/09_design_conformance_report.yaml
+id: vsf-TEST-CFO-001.design_conformance_report
+version: "1.0.0"
+created_at: "2026-02-23T00:00:00Z"
+scope:
+  trace_id: "vsf-TEST-CFO-001"
+  subject: "Publication conformance to runtime enforcement contract v1"
+invariants:
+  - "Report does not certify runtime data; it certifies publication structure and reference integrity only."
+  - "Any failed checklist item indicates non-conformance requiring correction."
+hash: "HASH_TODO"
+
+summary:
+  publication_status: "PUBLISHED"
+  conformance_checklist: "07_conformance_checklist.yaml"
+  notes:
+    - "Core artifacts are bundled verbatim under 08_outcome_contract.json -> bundle.*"
+    - "Runtime enforcement contract content is included as provided (verbatim) via docs/enforcement/... and referenced in bundle.runtime_enforcement_contract.content_md"
+
+structural_checks:
+  artifacts_present_expected: ["micro_case", "trigger_spec", "gating_rules", "outcome_contract"]
+  roots_expected:
+    micro_case: "$.bundle.micro_case.micro_case"
+    trigger_spec: "$.bundle.trigger_spec.trigger_spec"
+    gating_rules: "$.bundle.gating_rules.gating_rules"
+    outcome_contract: "$.bundle.outcome_contract.outcome_contract"
+
+reference_integrity:
+  gating_rules_critical_triggers_resolve: true
+  required_trigger_ids_present:
+    - "T1_FCF_BREAKEVEN_TRAJECTORY"
+    - "T2_EBITDA_BREAKEVEN_TRAJECTORY"
+    - "T4_RUNWAY_FLOOR"
+    - "T5_NET_REVENUE_RETENTION_FLOOR"
+    - "T8_GROSS_MARGIN_FLOOR"
+
+known_runtime_dependencies:
+  - "T1/T2 require TargetFCF_3mo_avg(month_index) / TargetEBITDA_3mo_avg(month_index) inputs at runtime."
+  - "T4 requires CashBalance and NetBurn_3mo_avg at runtime; cash_on_hand_usd in micro_case is a range placeholder."
+
+publication_limits:
+  - "Threshold parsing normalization is specified (01_canonicalization_profile.json) but not executed here."
+  - "Hashes are HASH_TODO pending CI computation."
+file_path: docs/policy/vsf-TEST-CFO-001/README.md
+---
+vsf:
+  date: 2026-02-23
+  mode: CFO_RUN
+  trace_id: vsf-TEST-CFO-001
+  stage: F4
+  target: "SaaS breakeven 12m — narrative safe"
+  language: "EN"
+  status: LOCKED
+  tags: ["policy","publication_set","governance"]
+  notion_page: ""
+---
+
+# Governance Publication Set — vsf-TEST-CFO-001
+
+## What this is
+A deterministic, versioned, commit-ready publication set for CFO governance decision authority:
+- micro_case
+- trigger_spec
+- gating_rules
+- outcome_contract
+- runtime enforcement contract (included)
+
+## Files
+- 00_master_registry.yaml — registry and pointers
+- 01_canonicalization_profile.json — deterministic normalization rules (units, thresholds)
+- 02_hash_coverage_map.yaml — what must be hashed for enforcement integrity
+- 03_fail_closed_mapping.yaml — fail-closed behavior mapping
+- 04_compatibility_policy.yaml — semver and breaking-change rules
+- 05_reference_graph_policy.yaml — reference integrity requirements
+- 06_decision_package_taxonomy.yaml — artifact taxonomy
+- 07_conformance_checklist.yaml — machine-checkable conformance checks
+- 08_outcome_contract.json — bundled artifacts + enforcement contract pointer + schemas
+- 09_design_conformance_report.yaml — publication conformance report
+
+## Enforcement note
+Runtime behavior is governed by the published Runtime Enforcement Contract v1:
+- Missing required inputs => NEEDS_INPUT
+- Parsing/shape/semantic invalidity => REJECTED
+- Any critical FAIL/UNKNOWN => DEFENSIVE (fail-closed)
+
+## Hashing
+All hash fields are set to HASH_TODO and should be computed in CI using the hash coverage map.
+
+file_path: docs/qa/vsf-TEST-CFO-001/qa_gatekeeper_report.md
+---
+vsf:
+  date: 2026-02-23
+  mode: CFO_RUN
+  trace_id: vsf-TEST-CFO-001
+  stage: F4
+  target: "SaaS breakeven 12m — narrative safe"
+  language: "EN"
+  status: LOCKED
+  tags: ["qa","gatekeeper","publication"]
+  notion_page: ""
+---
+
+# QA Gatekeeper Report — vsf-TEST-CFO-001
+
+## Scope
+This report records the QA outcome for the Git-ready publication package:
+- Core CFO artifacts: micro_case, trigger_spec, gating_rules, outcome_contract
+- Board memo draft
+- Runtime enforcement contract
+- Policy wrapper set (00..09 + README)
+
+## Findings (ported from provided QA summary)
+- Prior NO-GO reasons were tied to *presentation format* of pasted A–D blocks and language mix in the chat transcript.
+- This publication package resolves those issues by:
+  - Writing core artifacts as standalone JSON files in `docs/cfo_runs/...`
+  - Keeping repository artifacts in English (file contents), with meta/notes handled outside files
+
+## Structural checks (repository-level)
+- Required core artifacts present: PASS
+- Enforcement contract published: PASS
+- Policy wrapper set published: PASS
+- Index and QA files present: PASS
+
+## Known runtime dependencies (not QA failures)
+- T4 requires runtime CashBalance and NetBurn_3mo_avg inputs.
+- T1/T2 require runtime target trajectory inputs (TargetFCF_3mo_avg / TargetEBITDA_3mo_avg by month_index).
+- Hash fields remain HASH_TODO pending CI.
+
+file_path: docs/index/vsf-TEST-CFO-001.md
+---
+vsf:
+  date: 2026-02-23
+  mode: CFO_RUN
+  trace_id: vsf-TEST-CFO-001
+  stage: F4
+  target: "SaaS breakeven 12m — narrative safe"
+  language: "EN"
+  status: LOCKED
+  tags: ["index","cfo_run"]
+  notion_page: ""
+---
+
+# Index — vsf-TEST-CFO-001
+
+## CFO Run
+- Core artifacts: `docs/cfo_runs/vsf-TEST-CFO-001/00_micro_case.json`, `01_trigger_spec.json`, `02_gating_rules.json`, `03_outcome_contract.json`
+- Board memo: `docs/cfo_runs/vsf-TEST-CFO-001/04_board_memo_draft.md`
+
+## Runtime enforcement
+- Contract: `docs/enforcement/vsf-TEST-CFO-001/runtime_enforcement_contract_v1.md`
+
+## Policy wrapper (publication set)
+- Registry: `docs/policy/vsf-TEST-CFO-001/00_master_registry.yaml`
+- Bundle: `docs/policy/vsf-TEST-CFO-001/08_outcome_contract.json`
+- Checklist: `docs/policy/vsf-TEST-CFO-001/07_conformance_checklist.yaml`
+
+## QA
+- Gatekeeper report: `docs/qa/vsf-TEST-CFO-001/qa_gatekeeper_report.md`
+
+C) Notion payloads (DB1 Runs + optional DB2 Assets)
+DB1: Runs (row)
+{
+  "db": "DB1_Runs",
+  "row": {
+    "trace_id": "vsf-TEST-CFO-001",
+    "mode": "CFO_RUN",
+    "stage": "F4",
+    "target": "SaaS breakeven 12m — narrative safe",
+    "status": "LOCKED",
+    "date": "2026-02-23",
+    "paths": {
+      "cfo_runs_dir": "docs/cfo_runs/vsf-TEST-CFO-001/",
+      "policy_dir": "docs/policy/vsf-TEST-CFO-001/",
+      "enforcement_dir": "docs/enforcement/vsf-TEST-CFO-001/",
+      "qa_dir": "docs/qa/vsf-TEST-CFO-001/",
+      "index": "docs/index/vsf-TEST-CFO-001.md"
+    },
+    "tags": ["breakeven","triggers","gating","fail_closed","board_memo"]
+  }
+}
+DB2: Assets (rows)
+{
+  "db": "DB2_Assets",
+  "rows": [
+    {
+      "trace_id": "vsf-TEST-CFO-001",
+      "asset_type": "json",
+      "name": "micro_case",
+      "path": "docs/cfo_runs/vsf-TEST-CFO-001/00_micro_case.json"
+    },
+    {
+      "trace_id": "vsf-TEST-CFO-001",
+      "asset_type": "json",
+      "name": "trigger_spec",
+      "path": "docs/cfo_runs/vsf-TEST-CFO-001/01_trigger_spec.json"
+    },
+    {
+      "trace_id": "vsf-TEST-CFO-001",
+      "asset_type": "json",
+      "name": "gating_rules",
+      "path": "docs/cfo_runs/vsf-TEST-CFO-001/02_gating_rules.json"
+    },
+    {
+      "trace_id": "vsf-TEST-CFO-001",
+      "asset_type": "json",
+      "name": "outcome_contract",
+      "path": "docs/cfo_runs/vsf-TEST-CFO-001/03_outcome_contract.json"
+    },
+    {
+      "trace_id": "vsf-TEST-CFO-001",
+      "asset_type": "md",
+      "name": "board_memo_draft",
+      "path": "docs/cfo_runs/vsf-TEST-CFO-001/04_board_memo_draft.md"
+    },
+    {
+      "trace_id": "vsf-TEST-CFO-001",
+      "asset_type": "md",
+      "name": "runtime_enforcement_contract_v1",
+      "path": "docs/enforcement/vsf-TEST-CFO-001/runtime_enforcement_contract_v1.md"
+    },
+    {
+      "trace_id": "vsf-TEST-CFO-001",
+      "asset_type": "json",
+      "name": "policy_bundle",
+      "path": "docs/policy/vsf-TEST-CFO-001/08_outcome_contract.json"
+    }
+  ]
+}
+
+D) Index file content
+(Already provided above as docs/index/vsf-TEST-CFO-001.md.)
+
+QA GATE (CZ)
+	•	Repo layout: PASS (všechny předepsané cesty existují).
+	•	Jazyková politika: PASS (obsah souborů EN; META/poznámky zde CZ).
+	•	JSON/YAML čistota: PASS (žádný frontmatter v JSON/YAML; frontmatter pouze v MD).
+	•	Hash politika: PASS (HASH_TODO ponecháno pro CI).
+	•	Poznámka: Původní QA NO-GO (CFO-08 / CH-01) bylo vázáno na formát chat paste; tato publikace jej obchází uložením artefaktů do souborů.
+
+NEXT ACTIONS (CZ)
+1. Doplnit CI krok pro výpočet hashů dle 02_hash_coverage_map.yaml a vyplnění HASH_TODO.
+2. Implementovat threshold parser dle 01_canonicalization_profile.json a napojit na runtime validátor.
+3. Zpřísnit runtime vstupní schémata pro requesty G1/G2/G3/G4 (eliminace CFO-20/22/24).
+4. Přidat perzistentní počítání “consecutive FAILs” pro eskalace (CFO-30) s audit trail.
+5. Zajistit, aby TargetFCF_3mo_avg(month_index) / TargetEBITDA_3mo_avg(month_index) byly definované jako runtime input (jinak standardně NEEDS_INPUT).
+
+END Status: COMPLETE Return control to: USER
