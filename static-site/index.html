@@ -1,69 +1,305 @@
-<!-- CONTROL CENTER POLICY: GPT uses ONLY decision-api. Admin is manual only. -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decision Authority — Enterprise Control Center</title>
+  <meta name="description" content="Enterprise Control Center for Decision Authority (Workers + D1 + R2). Safe-by-default. Manual admin." />
+  <style>
+    :root{
+      --bg:#070A10;
+      --panel:#0E1525;
+      --panel2:#0B1220;
+      --muted:#98A2B3;
+      --text:#E6E8EF;
+      --accent:#7DD3FC;
+      --accent2:#A78BFA;
+      --border:#22304A;
+      --ok:#34D399;
+      --warn:#FBBF24;
+      --bad:#FB7185;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 600px at 15% 0%, rgba(125,211,252,.12), transparent 55%),
+                  radial-gradient(900px 500px at 85% 0%, rgba(167,139,250,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{ color:var(--accent); text-decoration:none; }
+    .wrap{ max-width:1100px; margin:0 auto; padding:26px; }
+    .topbar{
+      display:flex; gap:14px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap;
+      border:1px solid var(--border); background: linear-gradient(180deg, rgba(14,21,37,.92), rgba(11,18,32,.92));
+      border-radius:16px; padding:16px 16px;
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+    }
+    .mark{
+      width:36px;height:36px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(125,211,252,.95), rgba(167,139,250,.95));
+      box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset;
+    }
+    .title h1{ margin:0; font-size:18px; letter-spacing:.2px; }
+    .title p{ margin:2px 0 0; color:var(--muted); font-size:12px; }
+    .badges{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .badge{
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border); background: rgba(7,10,16,.6);
+      color:var(--muted);
+    }
+    .badge strong{ color:var(--text); font-weight:650; }
+    .grid{ display:grid; grid-template-columns: 1.2fr .8fr; gap:14px; margin-top:14px;}
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+    .panel{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(14,21,37,.92), rgba(11,18,32,.92));
+      border-radius:16px;
+      padding:16px;
+    }
+    .panel h2{ margin:0 0 10px; font-size:14px; letter-spacing:.3px; text-transform:uppercase; color:#D3D7E3; }
+    .muted{ color:var(--muted); font-size:12px; line-height:1.45;}
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 700px){ .row{ grid-template-columns: 1fr; } }
+    label{ display:block; font-size:12px; color:var(--muted); margin:10px 0 6px; }
+    input, textarea, select{
+      width:100%;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(7,10,16,.65);
+      color:var(--text);
+      padding:10px 12px;
+      outline:none;
+      font-family:var(--sans);
+    }
+    textarea{ min-height:110px; resize:vertical; }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    button{
+      border-radius:12px; border:1px solid var(--border);
+      background: rgba(20,30,54,.7);
+      color:var(--text);
+      padding:10px 12px;
+      cursor:pointer;
+      font-weight:650;
+    }
+    button.secondary{ background: rgba(7,10,16,.65); color:var(--muted); }
+    button.good{ background: rgba(52,211,153,.14); border-color: rgba(52,211,153,.35); }
+    .kbd{ font-family:var(--mono); font-size:12px; color:#C9D2E3; }
+    .code{
+      border:1px solid var(--border);
+      background: rgba(7,10,16,.65);
+      border-radius:14px;
+      padding:12px;
+      overflow:auto;
+      font-family:var(--mono);
+      font-size:12px;
+      color:#D7DBE8;
+      white-space:pre;
+    }
+    .callout{
+      border:1px solid rgba(251,191,36,.25);
+      background: rgba(251,191,36,.08);
+      border-radius:14px;
+      padding:12px;
+      margin:10px 0 0;
+    }
+    .callout strong{ color: #FFE8A3; }
+    .sep{ height:1px; background: rgba(34,48,74,.8); margin:14px 0; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border); background: rgba(7,10,16,.65);
+      font-size:12px; color:var(--muted);
+    }
+    .dot{ width:8px; height:8px; border-radius:50%; background: var(--warn); }
+    .dot.ok{ background: var(--ok); }
+    .dot.bad{ background: var(--bad); }
+    .small{ font-size:11px; color:var(--muted); }
+  </style>
+</head>
 
-<section>
-  <h2>Configure URLs (saved locally)</h2>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div class="title">
+          <h1>Decision Authority — Enterprise Control Center</h1>
+          <p>Safe-by-default runtime hub. <b>Custom GPT uses decision-api only</b>. Admin is manual (curl).</p>
+        </div>
+      </div>
+      <div class="badges">
+        <div class="badge"><strong>Env</strong>: <span id="envBadge">stage</span></div>
+        <div class="badge"><strong>Policy</strong>: v1</div>
+        <div class="badge"><strong>Engine</strong>: v0.1.0</div>
+        <div class="badge"><strong>Mode</strong>: Ops Hub</div>
+      </div>
+    </div>
 
-  <label>GitHub Repo URL</label>
-  <input id="repoUrl" placeholder="https://github.com/kernel-spec/decision-authority" />
+    <div class="grid">
+      <!-- LEFT: CONFIG + SAFE OPS -->
+      <div class="panel">
+        <h2>Configuration</h2>
+        <p class="muted">
+          This page stores only URLs in <span class="kbd">localStorage</span>. Do not store secrets here.
+          Admin access remains manual-only (terminal/curl).
+        </p>
 
-  <label>decision-api base URL (STAGE)</label>
-  <input id="decisionUrl" placeholder="https://decision-api-stage.victorain92.workers.dev" />
+        <div class="row">
+          <div>
+            <label>Environment</label>
+            <select id="envSelect">
+              <option value="stage">stage</option>
+              <option value="prod">prod</option>
+            </select>
+          </div>
+          <div>
+            <label>GitHub Repo URL</label>
+            <input id="repoUrl" placeholder="https://github.com/kernel-spec/decision-authority" />
+          </div>
+        </div>
 
-  <label>admin-api base URL (STAGE) (manual only)</label>
-  <input id="adminUrl" placeholder="https://admin-api-stage.victorain92.workers.dev" />
+        <div class="row">
+          <div>
+            <label>Decision API base URL</label>
+            <input id="decisionUrl" placeholder="https://decision-api-stage.victorain92.workers.dev" />
+          </div>
+          <div>
+            <label>Admin API base URL (manual only)</label>
+            <input id="adminUrl" placeholder="https://admin-api-stage.victorain92.workers.dev" />
+          </div>
+        </div>
 
-  <button onclick="saveCfg()">Save</button>
-  <button onclick="resetCfg()">Reset</button>
+        <div class="btns">
+          <button class="good" id="saveBtn">Save</button>
+          <button class="secondary" id="resetBtn">Reset</button>
+        </div>
 
-  <p style="opacity:.8">
-    Note: No secrets stored. Only localStorage for URLs. Admin is manual-only (curl).
-  </p>
-</section>
+        <div class="sep"></div>
 
-<hr/>
+        <h2>Safe Operations (Decision API)</h2>
+        <p class="muted">
+          These calls are safe to run without any secrets. Use them for smoke tests and run logging.
+        </p>
+        <div class="pill"><span class="dot" id="decisionDot"></span> Decision API status: <span id="decisionStatus">unknown</span></div>
 
-<section>
-  <h2>Quick Smoke Tests (SAFE)</h2>
-  <pre id="smokeSafe"></pre>
-</section>
+        <label>Smoke test (Decision health)</label>
+        <div class="code" id="decisionHealthCmd"></div>
 
-<section>
-  <h2>Admin (MANUAL ONLY)</h2>
-  <p><strong>Never put ADMIN_KEY into Custom GPT.</strong> Use terminal/curl only.</p>
-  <pre id="smokeAdmin"></pre>
-</section>
+        <label>Create decision run (example payload)</label>
+        <div class="code" id="createRunCmd"></div>
 
-<script>
-  const KEY = "da_cfg_v1";
-  function getCfg() {
-    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
-  }
-  function saveCfg() {
-    const cfg = {
-      repoUrl: document.getElementById("repoUrl").value.trim(),
-      decisionUrl: document.getElementById("decisionUrl").value.trim(),
-      adminUrl: document.getElementById("adminUrl").value.trim(),
+        <div class="callout">
+          <strong>Enterprise posture:</strong>
+          Custom GPT should call <span class="kbd">createDecisionRun</span> only (no admin calls).
+        </div>
+      </div>
+
+      <!-- RIGHT: MANUAL ADMIN + NOTES -->
+      <div class="panel">
+        <h2>Manual Admin (curl only)</h2>
+        <p class="muted">
+          Admin endpoints require <span class="kbd">x-admin-key</span>. Do not paste ADMIN_KEY into ChatGPT.
+          Store the key only in Cloudflare Worker secrets.
+        </p>
+
+        <div class="pill"><span class="dot" id="adminDot"></span> Admin API status: <span id="adminStatus">unknown</span></div>
+
+        <label>Admin health (manual)</label>
+        <div class="code" id="adminHealthCmd"></div>
+
+        <label>List runs (manual)</label>
+        <div class="code" id="adminRunsCmd"></div>
+
+        <div class="sep"></div>
+
+        <h2>Operator Notes</h2>
+        <textarea id="notes" placeholder="Paste incident notes / deployment notes (local only)."></textarea>
+        <div class="btns">
+          <button id="saveNotesBtn">Save notes</button>
+          <button class="secondary" id="clearNotesBtn">Clear notes</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>Links</h2>
+        <p class="muted">
+          <a id="repoLink" href="#" target="_blank" rel="noreferrer">Open GitHub Repo</a>
+          •
+          <a id="pagesLink" href="#" target="_blank" rel="noreferrer">Open Pages</a>
+        </p>
+
+        <p class="small">
+          Tip: Use <span class="kbd">tag v*</span> to deploy PROD via GitHub Actions.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CFG_KEY = "da_enterprise_cfg_v1";
+    const NOTES_KEY = "da_enterprise_notes_v1";
+
+    const defaults = {
+      env: "stage",
+      repoUrl: "https://github.com/kernel-spec/decision-authority",
+      decisionUrl: "https://decision-api-stage.victorain92.workers.dev",
+      adminUrl: "https://admin-api-stage.victorain92.workers.dev",
+      pagesUrl: "https://decision-authority.pages.dev"
     };
-    localStorage.setItem(KEY, JSON.stringify(cfg));
-    render();
-  }
-  function resetCfg() { localStorage.removeItem(KEY); location.reload(); }
 
-  function render() {
-    const cfg = getCfg();
-    document.getElementById("repoUrl").value = cfg.repoUrl || "";
-    document.getElementById("decisionUrl").value = cfg.decisionUrl || "";
-    document.getElementById("adminUrl").value = cfg.adminUrl || "";
+    const $ = (id) => document.getElementById(id);
 
-    const decision = (cfg.decisionUrl || "").replace(/\/+$/, "");
-    const admin = (cfg.adminUrl || "").replace(/\/+$/, "");
+    function normBase(url){
+      return (url || "").trim().replace(/\/+$/, "");
+    }
 
-    document.getElementById("smokeSafe").textContent =
-`# Health
-curl -s "${decision}/health" | jq
+    function loadCfg(){
+      try { return { ...defaults, ...(JSON.parse(localStorage.getItem(CFG_KEY) || "{}")) }; }
+      catch { return { ...defaults }; }
+    }
 
-# Create decision run (example payload)
-curl -s "${decision}/decision-runs" \\
+    function saveCfg(cfg){
+      localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+    }
+
+    function applyEnvPreset(env, cfg){
+      // If user uses stage/prod toggle, update URLs to your known pattern
+      if(env === "stage"){
+        cfg.decisionUrl = cfg.decisionUrl || defaults.decisionUrl;
+        cfg.adminUrl = cfg.adminUrl || defaults.adminUrl;
+      } else {
+        // prod canonical urls (no -stage)
+        cfg.decisionUrl = "https://decision-api.victorain92.workers.dev";
+        cfg.adminUrl = "https://admin-api.victorain92.workers.dev";
+      }
+      return cfg;
+    }
+
+    function render(){
+      const cfg = loadCfg();
+      $("envSelect").value = cfg.env;
+      $("envBadge").textContent = cfg.env;
+      $("repoUrl").value = cfg.repoUrl;
+      $("decisionUrl").value = cfg.decisionUrl;
+      $("adminUrl").value = cfg.adminUrl;
+
+      const decision = normBase(cfg.decisionUrl);
+      const admin = normBase(cfg.adminUrl);
+
+      $("repoLink").href = cfg.repoUrl || "#";
+      $("pagesLink").href = cfg.pagesUrl || defaults.pagesUrl;
+
+      $("decisionHealthCmd").textContent =
+`curl -s "${decision}/health" | jq`;
+
+      $("createRunCmd").textContent =
+`curl -s "${decision}/decision-runs" \\
   -H "content-type: application/json" \\
   -d '{
     "trace_id":"vsf-YYYYMMDD-001",
@@ -71,19 +307,65 @@ curl -s "${decision}/decision-runs" \\
     "input_text":"PASTE JOB POST HERE",
     "policy_version":"v1",
     "engine_version":"v0.1.0"
-  }' | jq
-`;
+  }' | jq`;
 
-    document.getElementById("smokeAdmin").textContent =
-`# Admin health (manual)
+      $("adminHealthCmd").textContent =
+`export ADMIN_KEY="(stored in Cloudflare Worker secret; do not paste into ChatGPT)"
 curl -s "${admin}/admin/health" \\
-  -H "x-admin-key: $ADMIN_KEY" | jq
+  -H "x-admin-key: $ADMIN_KEY" | jq`;
 
-# List runs (manual)
-curl -s "${admin}/admin/runs?limit=10" \\
-  -H "x-admin-key: $ADMIN_KEY" | jq
-`;
-  }
+      $("adminRunsCmd").textContent =
+`curl -s "${admin}/admin/runs?limit=10" \\
+  -H "x-admin-key: $ADMIN_KEY" | jq`;
 
-  render();
-</script>
+      // Notes
+      $("notes").value = localStorage.getItem(NOTES_KEY) || "";
+
+      // Status dots are informational only; we don't auto-call endpoints.
+      $("decisionStatus").textContent = "manual smoke test";
+      $("adminStatus").textContent = "manual (curl only)";
+      $("decisionDot").className = "dot ok";
+      $("adminDot").className = "dot";
+    }
+
+    $("saveBtn").addEventListener("click", () => {
+      let cfg = loadCfg();
+      cfg.env = $("envSelect").value;
+      cfg.repoUrl = $("repoUrl").value.trim();
+      cfg.decisionUrl = $("decisionUrl").value.trim();
+      cfg.adminUrl = $("adminUrl").value.trim();
+      cfg = applyEnvPreset(cfg.env, cfg);
+      saveCfg(cfg);
+      render();
+      alert("Saved (local only).");
+    });
+
+    $("resetBtn").addEventListener("click", () => {
+      localStorage.removeItem(CFG_KEY);
+      render();
+      alert("Reset (local only).");
+    });
+
+    $("envSelect").addEventListener("change", () => {
+      let cfg = loadCfg();
+      cfg.env = $("envSelect").value;
+      cfg = applyEnvPreset(cfg.env, cfg);
+      saveCfg(cfg);
+      render();
+    });
+
+    $("saveNotesBtn").addEventListener("click", () => {
+      localStorage.setItem(NOTES_KEY, $("notes").value || "");
+      alert("Notes saved (local only).");
+    });
+
+    $("clearNotesBtn").addEventListener("click", () => {
+      localStorage.removeItem(NOTES_KEY);
+      $("notes").value = "";
+      alert("Notes cleared.");
+    });
+
+    render();
+  </script>
+</body>
+</html>
