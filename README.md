@@ -1,54 +1,167 @@
-# Decision Authority — Repo Intelligence Report
+# Decision Authority
 
-> **A)** Systém pro deterministické řízení CFO/governance rozhodnutí nad Cloudflare Workers + D1 + R2 s auditní stopou a Custom GPT integrací.  
-> Důkaz: `workers/decision-api/src/index.ts`, `workers/admin-api/src/routes.ts`, `custom_gpt_system_prompts/`
+**A)** Platforma pro deterministické CFO/governance rozhodnutí: Custom GPT odešle strukturovaný případ přes REST API, systém ho uloží do auditní databáze s `trace_id`, a operátor může výsledky zkontrolovat přes admin API chráněné klíčem.
 
 ---
 
 ## B) Pro koho a k čemu
 
-- **CFO / vrcholový management** – auditovatelná, reprodukovatelná rozhodnutí (hire/no-hire, spending tranche, boardové schválení)
-- **Governance týmy** – vynucení policy pravidel přes fail-closed logiku, hashování artefaktů
-- **Ops / SRE** – sledování runů, retence dat, propagace policy verzí
-- **Custom GPT uživatelé** – GPT volá `POST /decision-runs` a dostane `trace_id`; admin je pouze manuální (curl)
-- **Auditoři / právní** – každý run je uložen v D1 se stavem, hash hodnotou, verzí policy i enginu
-- **Vývojáři integrace** – Cloudflare Workers jsou stateless, napojeny na D1 (SQLite) a R2 (artefakty)
-
-Důkazy: `static-site/index.html` (sekce „Enterprise posture"), `workers/decision-api/wrangler.toml`, `workers/decision-api/migrations/`
+- **CFO / management** – auditovatelná, reprodukovatelná rozhodnutí (hire/no-hire, spending tranche, boardové schválení) s plnou historií v D1
+- **Custom GPT uživatelé** – GPT volá `POST /decision-runs` a dostane `trace_id`; vše ostatní je manuální (curl)
+- **Ops / SRE** – sledování runů (`GET /admin/runs`), budoucí retence a propagace policy verzí
+- **Governance / Auditoři** – každý run je uložen se stavem, verzí policy i enginu, hash hodnotou a stopou
+- **Vývojáři integrace** – dva Cloudflare Workers (stateless) napojené na sdílenou D1 (SQLite) a R2 (artefakty)
 
 ---
 
 ## C) Struktura repozitáře
 
-| Cesta | Role | Poznámka |
-|---|---|---|
-| `workers/decision-api/` | Hlavní Cloudflare Worker | Přijímá CFO runy, zapisuje do D1; public endpoint |
-| `workers/admin-api/` | Admin Cloudflare Worker | CRUD nad D1; chráněno `X-ADMIN-KEY`; manuální přístup |
-| `workers/decision-api/migrations/` | D1 SQL schéma | 3 migrace: init, admin tabulky, trace_id/mode sloupce |
-| `workers/decision-api/src/index.test.ts` | Unit testy | Node.js `node:test`; pokrývají happy path, DB chybu, timing |
-| `policy/` | Strojově čitelná policy | `canonicalization/v1.json`, `fail_closed_mapping/v1.json`, `conformance_checklist/v1.json` |
-| `scripts/policy-validate.mjs` | CI validátor policy | Kontroluje existenci a syntaxi JSON policy souborů |
-| `custom_gpt_system_prompts/` | System prompty pro Custom GPT | 8 GPT agentů (CFO, QA, Export, Ops, Security…) |
-| `static-site/` | Ops Control Center (Cloudflare Pages) | HTML/JS SPA; ukládá config do `localStorage`; generuje curl příkazy |
-| `docs/` | Dokumentace + příklady runů | OPS_RUNBOOK, SECURITY, POLICY_RELEASE (šablony); run `vsf-TEST-CFO-001` |
-| `.github/workflows/` | CI/CD | `ci.yml` (PR+main), `deploy.yml` (stage/prod), `release.yml` (tag) |
+| Cesta | Role |
+|---|---|
+| `workers/decision-api/` | Hlavní Worker — přijímá CFO runy, zapisuje do D1, vrací `trace_id`; veřejný endpoint |
+| `workers/admin-api/` | Admin Worker — čtení runů a správa DB; chráněno hlavičkou `X-ADMIN-KEY` |
+| `workers/decision-api/migrations/` | D1 SQL schéma — 3 migrace: init tabulky, admin tabulky, trace_id/mode sloupce |
+| `workers/decision-api/src/index.test.ts` | Unit testy — Node.js `node:test`; happy path, DB chyba, timing |
+| `policy/` | Strojově čitelná policy — canonicalization, fail_closed_mapping, conformance_checklist |
+| `scripts/policy-validate.mjs` | CI validátor — ověřuje existenci a syntaxi JSON policy souborů |
+| `custom_gpt_system_prompts/` | System prompty pro 8 Custom GPT agentů (CFO, QA, Export, Ops, Security…) |
+| `static-site/` | Ops Control Center (Cloudflare Pages) — generuje curl příkazy, ukládá URL do `localStorage` |
+| `docs/` | Dokumentace + ukázkový run `vsf-TEST-CFO-001`; `OPS_RUNBOOK`, `SECURITY`, `POLICY_RELEASE` jsou zatím šablony |
+| `.github/workflows/` | CI/CD: `ci.yml` (testy), `deploy.yml` (stage/prod), `release.yml` (GitHub Release) |
 
 ---
 
-## D) Architektura & datové toky
+## D) Quickstart — spuštění, testy, deploy
 
-1. **Custom GPT** volá `POST /decision-runs` na `decision-api` Worker s JSON payloadem
-2. **decision-api** vygeneruje `trace_id` (UUID), zapíše řádek do D1 tabulky `decision_runs` se stavem `PENDING`
-3. Vrátí `{ trace_id }` — GPT používá `trace_id` pro auditní stopu
-4. **admin-api** slouží operátorům; endpoint `GET /admin/runs` vrací posledních N runů z D1
-5. Auth gate: všechny `/admin/*` požadavky musí nést hlavičku `X-ADMIN-KEY` (Cloudflare Worker secret)
-6. **Cloudflare D1** sdílí databáze mezi oběma Workers (stejné `database_id` dle prostředí)
-7. **Cloudflare R2** je připojen jako bucket pro artefakty (bindingy `R2`); aktuálně ne plně využit v kódu
-8. **Static site** (Cloudflare Pages) je Ops Control Center — generuje curl příkazy, ukládá pouze URL do localStorage
-9. **Policy validace** probíhá v CI (`scripts/policy-validate.mjs`) před spuštěním testů Workers
-10. **Migrace** aplikuje `wrangler d1 migrations apply` v deploy workflow před nasazením Workers
-11. **Nasazení** na stage: každý push na `main`; na prod: push tagu `v*`
-12. **Custom GPT agenti** (8 rolí) jsou definováni system prompty; komunikují s Workers přes standardní REST volání
+### Prerekvizity
+- Node.js 20+
+- Wrangler CLI: `npm install -g wrangler`
+- Cloudflare účet s D1 a R2 přístupem
+
+### Instalace & kontrola
+
+```bash
+# 1. Instalace závislostí
+cd workers/decision-api && npm ci
+cd ../admin-api         && npm ci
+
+# 2. Typová kontrola
+cd workers/decision-api && npm run typecheck
+cd workers/admin-api    && npm run typecheck
+
+# 3. Policy validace
+node scripts/policy-validate.mjs
+
+# 4. Unit testy (decision-api)
+cd workers/decision-api && npm test
+```
+
+### Lokální vývoj
+
+```bash
+# Wrangler dev server (navržené — není v package.json scripts)
+cd workers/decision-api && npx wrangler dev
+cd workers/admin-api    && npx wrangler dev
+```
+
+### Deploy
+
+```bash
+# Stage (automaticky při push na main, nebo manuálně):
+cd workers/decision-api
+npx wrangler d1 migrations apply decision_authority_stage --remote --env stage
+npx wrangler deploy --env stage
+cd ../admin-api && npx wrangler deploy --env stage
+
+# Prod (automaticky při push tagu v*, nebo manuálně):
+git tag v1.0.0 && git push --tags
+```
+
+### Smoke test (po deployi)
+
+```bash
+# Vytvoř decision run (veřejný endpoint):
+curl -s "https://decision-api-stage.victorain92.workers.dev/decision-runs" \
+  -H "content-type: application/json" \
+  -d '{"trace_id":"vsf-test-001","mode":"JOB","policy_version":"v1","engine_version":"v0.1.0","input_text":"test"}' | jq
+
+# Admin health (vyžaduje ADMIN_KEY):
+curl -s "https://admin-api-stage.victorain92.workers.dev/admin/health" \
+  -H "x-admin-key: $ADMIN_KEY" | jq
+```
+
+---
+
+## E) CI/CD přehled
+
+| Workflow | Spouští se | Co dělá |
+|---|---|---|
+| `.github/workflows/ci.yml` | Každý PR + push na `main` | policy-validate → typecheck + `npm test` pro oba Workers |
+| `.github/workflows/deploy.yml` | Push na `main` (stage) / tag `v*` (prod) | D1 migrace → `wrangler deploy` oba Workers |
+| `.github/workflows/release.yml` | Push tagu `v*` | Vytvoří GitHub Release s auto-generated notes |
+
+Potřebná GitHub Actions secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+
+---
+
+## F) Integrace & konfigurace
+
+### ENV proměnné (Workers)
+
+| Proměnná | Worker | Typ | Popis |
+|---|---|---|---|
+| `ENV` | oba | var | Prostředí: `dev` / `stage` / `prod` |
+| `POLICY_VERSION` | decision-api | var | Verze policy stamped na každý run |
+| `ENGINE_VERSION` | decision-api | var | Verze enginu stamped na každý run |
+| `REQUIRE_TRIGGERS` | decision-api | var | `true`/`false` — definováno, zatím nevynucováno v kódu |
+| `REQUIRE_GATING` | decision-api | var | `true`/`false` — definováno, zatím nevynucováno v kódu |
+| `ADMIN_KEY` | admin-api | **secret** | Klíč pro `/admin/*` — nastavit přes `wrangler secret put` |
+
+### Secrets pro CI/CD (GitHub)
+
+| Secret | Kde se používá |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | `.github/workflows/deploy.yml` — wrangler auth |
+| `CLOUDFLARE_ACCOUNT_ID` | `.github/workflows/deploy.yml` — wrangler auth |
+
+### Cloudflare bindingy
+
+| Binding | Typ | stage | prod |
+|---|---|---|---|
+| `DB` | D1 SQLite | `decision_authority_stage` | `decision_authority_prod` |
+| `R2` | R2 Bucket | `decision-authority-artifacts-stage` | `decision-authority-artifacts-prod` |
+
+### Externí služby
+
+- **Cloudflare D1** — primární DB; tabulky `decision_runs`, `artifacts`, `audit_events`, `usage_ledger`, `system_state`
+- **Cloudflare R2** — bucket pro artefakty; binding přítomný, zápis zatím neimplementován v kódu
+- **Cloudflare Pages** — hosting `static-site/` (Ops Control Center)
+- **Custom GPT / OpenAI** — klient volá `POST /decision-runs`; nemá přístup k admin-api
+
+---
+
+## G) Nejasnosti / chybějící informace
+
+1. **`POST /decision-runs` bez auth** — endpoint je veřejný; není jasné, zda jde o záměr (Custom GPT nepodporuje autentizaci snadno) nebo mezeru v bezpečnosti
+2. **R2 nevyužito** — binding existuje v `wrangler.toml` i `Env` interface, ale žádný kód do R2 nezapisuje; plán nebo zapomenutý feature?
+3. **`REQUIRE_TRIGGERS` / `REQUIRE_GATING`** — proměnné jsou definovány, ale `decision-api` je v kódu nepoužívá; kdy budou vynuceny?
+4. **Admin stuby** — `/admin/retention/purge` a `/admin/policy/promote` vracejí vždy `{ ok: true }` bez logiky; kdy budou implementovány?
+5. **`mode` nevyplňován** — migrace 0003 přidala sloupec `mode`, ale `decision-api` ho při insertu neposílá; datová nekonzistence
+6. **`vsf-TEST-CFO-001`** — run v `docs/cfo_runs/` obsahuje konkrétní finanční čísla; záměr ho commitovat do veřejného repo?
+
+---
+
+## H) Doporučené další kroky
+
+1. **Auth pro `POST /decision-runs`** _(~30 min)_ — přidat volitelný `X-API-KEY` header nebo Cloudflare Access pravidlo; aktuálně libovolný klient může vytvořit run
+2. **Testy admin-api** _(~45 min)_ — doplnit `workers/admin-api/src/index.test.ts` podle vzoru v decision-api; aktuálně nulové pokrytí
+3. **Implementace admin stubů** _(~30 min)_ — `/admin/retention/purge`: `DELETE FROM decision_runs WHERE created_at < ?`; `/admin/policy/promote`: `UPDATE system_state SET value = ? WHERE key = 'active_policy_version'`
+4. **Vyplnit `mode` při insertu** _(~15 min)_ — přečíst `mode` z request body v `decision-api/src/index.ts` a uložit do D1
+5. **Vyplnit šablonové docs** _(~60 min)_ — `docs/OPS_RUNBOOK.md`, `docs/SECURITY.md`, `docs/POLICY_RELEASE.md` obsahují jen `(Template)`; doplnit alespoň základní obsah
+
+---
+
+## Architektura
 
 ```mermaid
 flowchart TD
@@ -60,226 +173,46 @@ flowchart TD
 
     subgraph CF_Workers[Cloudflare Workers]
         DA[decision-api\nPOST /decision-runs]
-        AA[admin-api\n/admin/*]
+        AA[admin-api\nGET /admin/runs\nPOST /admin/*]
     end
 
     subgraph CF_Data[Cloudflare Data]
-        D1[(D1 SQLite\ndecision_runs\nartifacts\nusage_ledger\nsystem_state)]
+        D1[(D1 SQLite\ndecision_runs · artifacts\nusage_ledger · system_state)]
         R2[(R2 Bucket\nArtifacts)]
     end
 
     subgraph CI_CD[GitHub Actions]
-        CI[ci.yml\nvalidate + test]
+        CI[ci.yml\npolicy-validate + test]
         DEPLOY[deploy.yml\nwrangler deploy]
         REL[release.yml\ngh release]
     end
 
-    subgraph Policy[Policy Layer]
-        PV[policy-validate.mjs]
-        PF[policy/\ncanonicalization\nfail_closed\nchecklist]
-    end
-
     GPT -->|POST /decision-runs| DA
     DA -->|INSERT decision_runs| D1
-    DA -->|R2 write artefaktů| R2
-    DA -->|trace_id| GPT
+    DA -->|"{ trace_id }"| GPT
 
     OPS -->|X-ADMIN-KEY| AA
-    AA -->|SELECT decision_runs| D1
-    AA -->|stub /retention/purge\n/policy/promote| D1
+    AA -->|SELECT / stub writes| D1
 
-    PAGES -->|generuje curl příkazy\n localStorage only| OPS
+    PAGES -->|generuje curl příkazy| OPS
 
-    CI --> PV
-    PV --> PF
-    CI -->|npm test + typecheck| DA
-    CI -->|npm test + typecheck| AA
-
+    CI -->|validate policy JSON + npm test| DA
     DEPLOY -->|d1 migrations apply| D1
     DEPLOY -->|wrangler deploy| DA
     DEPLOY -->|wrangler deploy| AA
 ```
 
----
+### HTTP endpointy
 
-## E) Mapa rozhraní
-
-### E1) HTTP endpointy
-
-| Metoda | Path | Worker | Auth | Vstup / Výstup | Poznámka |
-|---|---|---|---|---|---|
-| `POST` | `/decision-runs` | decision-api | — | JSON body → `{ trace_id }` | Zapíše do D1; kód v `src/index.ts` |
-| `GET` | `/admin/health` | admin-api | `X-ADMIN-KEY` | — → `{ ok, ts }` | Health check |
-| `GET` | `/admin/runs` | admin-api | `X-ADMIN-KEY` | `?limit=N` → `{ rows[], count, newest_created_at }` | D1 SELECT, default limit 50, max 200 |
-| `POST` | `/admin/retention/purge` | admin-api | `X-ADMIN-KEY` | — → `{ ok: true }` | Stub (neimplementováno) |
-| `POST` | `/admin/policy/promote` | admin-api | `X-ADMIN-KEY` | — → `{ ok: true }` | Stub (neimplementováno) |
-
-Důkaz: `workers/admin-api/src/routes.ts`, `workers/decision-api/src/index.ts`
-
-### E2) Eventy / Cron / Queue
-
-| Typ | Spouštěč | Handler | Payload | Side effects |
+| Metoda | Path | Worker | Auth | Výstup |
 |---|---|---|---|---|
-| CI workflow | PR nebo push na `main` | `.github/workflows/ci.yml` | — | policy-validate + typecheck + test obou Workers |
-| Deploy stage | Push na větev `main` | `.github/workflows/deploy.yml` (job `deploy-stage`) | — | D1 migrace + wrangler deploy do stage |
-| Deploy prod | Push tagu `v*` | `.github/workflows/deploy.yml` (job `deploy-prod`) | — | D1 migrace + wrangler deploy do prod |
-| Release | Push tagu `v*` | `.github/workflows/release.yml` | — | GitHub Release s auto-generated notes |
+| `POST` | `/decision-runs` | decision-api | — (veřejný) | `{ trace_id }` |
+| `GET` | `/admin/health` | admin-api | `X-ADMIN-KEY` | `{ ok, ts }` |
+| `GET` | `/admin/runs` | admin-api | `X-ADMIN-KEY` | `{ rows[], count, newest_created_at }` |
+| `POST` | `/admin/retention/purge` | admin-api | `X-ADMIN-KEY` | `{ ok: true }` _(stub)_ |
+| `POST` | `/admin/policy/promote` | admin-api | `X-ADMIN-KEY` | `{ ok: true }` _(stub)_ |
 
 ---
 
-## F) Jak spustit / testovat / buildit / deployovat
-
-### Prerekvizity
-- Node.js 20+
-- [Wrangler CLI](https://developers.cloudflare.com/workers/cli-wrangler/) (`npm install -g wrangler`)
-- Cloudflare účet s D1 a R2 přístupem
-
-### Instalace závislostí
-```bash
-cd workers/decision-api && npm ci
-cd workers/admin-api   && npm ci
-```
-
-### Typová kontrola
-```bash
-cd workers/decision-api && npm run typecheck
-cd workers/admin-api   && npm run typecheck
-```
-
-### Testy
-```bash
-# decision-api (má unit testy)
-cd workers/decision-api && npm test
-
-# admin-api (žádné testy; příkaz spustí node --test, projde prázdně)
-cd workers/admin-api && npm test
-```
-
-### Policy validace
-```bash
-node scripts/policy-validate.mjs
-```
-
-### Lokální dev (Wrangler dev server)
-```bash
-# navržené — není explicitně v package.json
-cd workers/decision-api && npx wrangler dev
-cd workers/admin-api   && npx wrangler dev
-```
-
-### Deploy na stage
-```bash
-cd workers/decision-api
-npx wrangler d1 migrations apply decision_authority_stage --remote --env stage
-npx wrangler deploy --env stage
-
-cd workers/admin-api
-npx wrangler deploy --env stage
-```
-
-### Deploy na prod
-```bash
-# Automaticky při push tagu v* — nebo manuálně:
-git tag v1.0.0 && git push --tags
-```
-
----
-
-## G) CI/CD přehled
-
-| Soubor | Účel | Spouští se |
-|---|---|---|
-| `.github/workflows/ci.yml` | Validace policy JSON + typecheck + testy obou Workers | Každý PR a push na `main` |
-| `.github/workflows/deploy.yml` | Wrangler deploy na stage (main) nebo prod (tag v*) | Push na `main` nebo tag `v*` |
-| `.github/workflows/release.yml` | Vytvoří GitHub Release s auto-notes | Push tagu `v*` |
-
-Potřebná secrets v GitHub Actions: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (+ `GITHUB_TOKEN` je automatický).
-
----
-
-## H) Integrace & konfigurace
-
-### ENV proměnné / secrets
-
-| Název | Worker | Kde se čte | Typ |
-|---|---|---|---|
-| `ENV` | decision-api, admin-api | `wrangler.toml` `[vars]` | var (dev/stage/prod) |
-| `POLICY_VERSION` | decision-api | `wrangler.toml` `[vars]`, `src/index.ts` řádek ~14 | var |
-| `ENGINE_VERSION` | decision-api | `wrangler.toml` `[vars]`, `src/index.ts` řádek ~15 | var |
-| `REQUIRE_TRIGGERS` | decision-api | `wrangler.toml` `[vars]` | var (true/false) |
-| `REQUIRE_GATING` | decision-api | `wrangler.toml` `[vars]` | var (true/false) |
-| `ADMIN_KEY` | admin-api | `src/routes.ts` řádek ~8 (`env.ADMIN_KEY`) | **secret** — Cloudflare Worker secret |
-| `CLOUDFLARE_API_TOKEN` | CI/CD | `.github/workflows/deploy.yml` | GitHub secret |
-| `CLOUDFLARE_ACCOUNT_ID` | CI/CD | `.github/workflows/deploy.yml` | GitHub secret |
-
-### Cloudflare bindingy (wrangler.toml)
-
-| Binding | Typ | Prostředí | Hodnota |
-|---|---|---|---|
-| `DB` | D1 Database | stage | `decision_authority_stage` |
-| `DB` | D1 Database | prod | `decision_authority_prod` |
-| `R2` | R2 Bucket | stage | `decision-authority-artifacts-stage` |
-| `R2` | R2 Bucket | prod | `decision-authority-artifacts-prod` |
-
-### Externí služby
-
-- **Cloudflare D1** – primární úložiště (SQLite); oba Workers sdílí stejné DB
-- **Cloudflare R2** – úložiště artefaktů; binding přítomný, ale plné využití zatím v kódu není implementováno
-- **Cloudflare Pages** – hosting `static-site/` jako Ops Control Center
-- **Custom GPT (OpenAI)** – volá `decision-api` REST endpoint; nemá přímý přístup k admin-api
-- **GitHub Actions** – CI/CD pipeline; používá `wrangler` pro deploy
-
----
-
-## I) Rizika / dluh / sporná místa
-
-1. **`POST /decision-runs` bez auth** – veřejný endpoint bez autentizace; libovolný klient může vytvořit run. *Střední riziko.* Doporučeno: přidat API klíč nebo rate limiting.
-2. **Admin stubs** – `/admin/retention/purge` a `/admin/policy/promote` vrací vždy `{ ok: true }` bez logiky. *Technický dluh.*
-3. **R2 nevyužito v kódu** – binding existuje, ale Workers s R2 reálně nepracují. *Nekonzistence.*
-4. **Žádné testy admin-api** – `workers/admin-api` nemá žádné testy. *Riziko regresí.*
-5. **`mode` a `trace_id` null** – migrace 0003 přidává sloupce jako nullable; `decision-api` nevyplňuje `mode`. *Datová nekonzistence.*
-6. **Docs jsou šablony** – `docs/OPS_RUNBOOK.md`, `docs/SECURITY.md`, `docs/POLICY_RELEASE.md` obsahují jen text `(Template)`.
-7. **Chybí `.env.example`** – nový vývojář neví, jaké proměnné nastavit.
-8. **Hash TODO** – policy artefakty obsahují `HASH_TODO` placeholdery; CI krok pro výpočet hashů chybí.
-9. **Žádný rate limiting** – Workers nemají žádnou ochranu proti flooding útokům.
-10. **`REQUIRE_TRIGGERS` / `REQUIRE_GATING` nevynuceno** – proměnné jsou definovány, ale `decision-api` s nimi v kódu nepracuje.
-
----
-
-## J) Doporučené další kroky (top 5, do 30–60 min)
-
-1. **Auth pro `POST /decision-runs`** (30 min) — přidat volitelný `X-API-KEY` header nebo Cloudflare Access pravidlo
-2. **Testy admin-api** (45 min) — doplnit `workers/admin-api/src/index.test.ts` paralelně s existujícím vzorem v decision-api
-3. **Implementace admin stubů** (30 min) — `/admin/retention/purge`: DELETE FROM decision_runs WHERE created_at < cutoff; `/admin/policy/promote`: UPDATE system_state
-4. **Vyplnění `mode` při insertu** (15 min) — `decision-api/src/index.ts` přečíst `mode` z request body a uložit do D1
-5. **CI krok pro SHA-256 hashování artefaktů** (45 min) — doplnit do `scripts/policy-validate.mjs` nebo nový skript
-
----
-
-## K) Návrh PR — co přidat/změnit v dokumentaci
-
-| Soubor | Typ změny | Popis |
-|---|---|---|
-| `README.md` | Přepsání | Tento dokument — overview, quickstart, architektura (Mermaid), API reference, config |
-| `.env.example` | Nový soubor | Env proměnné s komentáři |
-| `docs/audit.md` | Nový soubor | Auditní dotazy, výstupy, evidence index |
-| `docs/OPS_RUNBOOK.md` | Rozšíření šablony | Přidat deployment steps, health check commands |
-| `docs/SECURITY.md` | Rozšíření šablony | Popis auth mechanismů, threat model |
-
----
-
-## Co bych ověřil dotazem na autora
-
-1. **Má `decision-api` plánovanou autentizaci?** Endpoint `POST /decision-runs` je veřejný — záměr nebo mezera?
-2. **Kdy budou implementovány admin stuby** (`/retention/purge`, `/policy/promote`)?
-3. **Jak se reálně používá R2 binding?** Kód R2 nezapisuje — je to plán nebo zapomenutý feature?
-4. **Jaké je zamýšlené URL schéma Cloudflare Pages?** V kódu je hardcoded `decision-authority.pages.dev` a `victorain92.workers.dev`.
-5. **Je `vsf-TEST-CFO-001` reálný run nebo jen testovací příklad?** Obsahuje citlivá finanční data — záměr commitovat do veřejného repo?
-6. **Jak se Custom GPT autentizuje vůči `decision-api`?** Žádná auth na endpointu není patrná z kódu.
-
----
-
-## Původní obsah (archivní)
-
-> Generated: 2026-02-22  
-> This zip includes: Custom GPT system prompts, GitHub Actions CI/CD workflows, Cloudflare Workers wrangler configs (stage/prod), D1 migrations (including usage_ledger + system_state), Minimal docs templates, Proof PDF: `assets/proof/board-ready-micro-cases.pdf`
+> Podrobná auditní stopa (ripgrep dotazy + výsledky) je v [`docs/audit.md`](docs/audit.md).  
+> Vzorový env soubor je v [`.env.example`](.env.example).
